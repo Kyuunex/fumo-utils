@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "fumo-utils",
+  "version": "${version}",
+  "name": "FumoUtils",
+  "description": "A based addon for Meteor Client.",
+  "authors": [
+    "Kyuunex"
+  ],
+  "contact": {
+    "repo": "https://github.com/Kyuunex/fumo-utils"
+  },
+  "icon": "assets/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "meteor": [
+      "moe.kyuunex.fumo_utils.FumoUtils"
+    ]
+  },
+  "mixins": [
+    "fumo-utils.mixins.json"
+  ],
+  "custom": {
+    "meteor-client:color": "225,25,25"
+  },
+  "depends": {
+    "java": ">=21",
+    "minecraft": ["${mc_version}"],
+    "meteor-client": "*"
+  }
+}
