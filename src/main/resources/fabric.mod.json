@@ -20,6 +20,7 @@
   "mixins": [
     "fumo-utils.mixins.json"
   ],
+  "accessWidener": "fumo-utils.accesswidener",
   "custom": {
     "meteor-client:color": "225,25,25"
   },

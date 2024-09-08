@@ -20,7 +20,9 @@ public class FumoUtils extends MeteorAddon {
         LOG.info("Initializing FumoUtils");
 
         // Modules
+        Modules.get().add(new AutoDump());
         Modules.get().add(new ChatNotifier());
+        Modules.get().add(new DoujinDupe());
         Modules.get().add(new QuartzFarmer());
         Modules.get().add(new WebhookBridge());
 
