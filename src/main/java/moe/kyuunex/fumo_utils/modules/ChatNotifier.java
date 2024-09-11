@@ -1,8 +1,6 @@
 package moe.kyuunex.fumo_utils.modules;
 
 import java.util.List;
-import java.util.Objects;
-import meteordevelopment.meteorclient.commands.commands.ServerCommand;
 
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -10,12 +8,10 @@ import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.*;
-import net.minecraft.network.ClientConnection;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import moe.kyuunex.fumo_utils.utils.Webhook;
 
