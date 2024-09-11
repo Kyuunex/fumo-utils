@@ -56,7 +56,7 @@ public class ChatNotifier extends Module {
     private final Setting<String> whisperDetectionString = sgWhispers.add(new StringSetting.Builder()
         .name("whisper-detection-string")
         .description("String that lets this module distinguish the message as a whisper")
-        .defaultValue("whispers: >")
+        .defaultValue(" whispers: ")
         .build()
     );
 
