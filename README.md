@@ -5,7 +5,12 @@ Public edition of FumoUtils
 - AutoDump
 - ChatNotifier
 - DoujinDupe
+- MapHighlighter
 - QuartzFarmer
 - WebhookBridge
+
+### Available commands:
+- OfflineUUIDGen
+- PrintTPS
 
 ![fumo](fumo.gif)
