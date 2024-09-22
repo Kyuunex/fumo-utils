@@ -30,6 +30,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new WebhookBridge());
 
         // Commands
+        Commands.add(new ChatCooker());
         Commands.add(new PrintTPS());
         Commands.add(new OfflineUUIDGen());
     }
