@@ -1,11 +1,9 @@
 package moe.kyuunex.fumo_utils.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.Text;
 
 import java.util.Random;
 
@@ -20,19 +18,23 @@ public class ChatCooker extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("unicode").then(argument("length", StringArgumentType.word()).executes(context -> {
+        builder.then(literal("unicode").then(argument("length", IntegerArgumentType.integer()).executes(context -> {
             int length = IntegerArgumentType.getInteger(context, "length");
 
             assert mc.player != null;
-            mc.player.sendMessage(Text.literal(randomText(length, true)));
+            assert mc.getNetworkHandler() != null;
+
+            mc.getNetworkHandler().sendChatMessage(randomText(length, true));
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("ascii").then(argument("length", StringArgumentType.word()).executes(context -> {
+        builder.then(literal("ascii").then(argument("length", IntegerArgumentType.integer()).executes(context -> {
             int length = IntegerArgumentType.getInteger(context, "length");
 
             assert mc.player != null;
-            mc.player.sendMessage(Text.literal(randomText(length, false)));
+            assert mc.getNetworkHandler() != null;
+
+            mc.getNetworkHandler().sendChatMessage(randomText(length, false));
             return SINGLE_SUCCESS;
         })));
     }
