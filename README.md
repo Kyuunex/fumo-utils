@@ -7,9 +7,11 @@ Public edition of FumoUtils
 - DoujinDupe
 - MapHighlighter
 - QuartzFarmer
+- RegionFileHighlighter
 - WebhookBridge
 
 ### Available commands:
+- ChatCooker
 - OfflineUUIDGen
 - PrintTPS
 
