@@ -5,6 +5,7 @@ Public edition of FumoUtils
 - AutoDump
 - ChatNotifier
 - DoujinDupe
+- ItemESP
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
