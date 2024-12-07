@@ -8,6 +8,7 @@ Public edition of FumoUtils
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
+- UnSilkToucher
 - WebhookBridge
 
 ### Available commands:
