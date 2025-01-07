@@ -5,6 +5,8 @@ Public edition of FumoUtils
 - AutoDump
 - ChatNotifier
 - DoujinDupe
+- ElytraWatch
+- HighwayHighlighter
 - ItemESP
 - MapHighlighter
 - QuartzFarmer
