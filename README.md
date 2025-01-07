@@ -1,5 +1,10 @@
 # FumoUtils (Public)
-Public edition of FumoUtils
+Public edition of FumoUtils.
+
+### Requirements
+- Minecraft 1.21.1
+- Fabric loader
+- Meteor Client
 
 ### Available modules:
 - AutoDump
