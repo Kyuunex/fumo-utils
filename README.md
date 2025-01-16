@@ -7,6 +7,7 @@ Public edition of FumoUtils.
 - Meteor Client
 
 ### Available modules:
+- AltitudeStabilizer
 - AutoDump
 - ChatNotifier
 - DoujinDupe
