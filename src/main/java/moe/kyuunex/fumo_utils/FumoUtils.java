@@ -27,6 +27,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new ChatNotifier());
         Modules.get().add(new DoujinDupe());
         Modules.get().add(new ElytraWatch());
+        Modules.get().add(new FumoVoidESP());
         Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new ItemESP());
         Modules.get().add(new MapHighlighter());
