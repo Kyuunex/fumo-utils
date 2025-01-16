@@ -35,6 +35,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new RegionFileHighlighter());
         Modules.get().add(new UnSilkToucher());
         Modules.get().add(new WebhookBridge());
+        Modules.get().add(new WireproxyIntegration());
 
         // Commands
         Commands.add(new ChatCooker());
