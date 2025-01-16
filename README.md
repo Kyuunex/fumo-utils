@@ -27,4 +27,8 @@ Public edition of FumoUtils.
 - OfflineUUIDGen
 - PrintTPS
 
+### Credits
+Special thanks to V for providing and improving some modules!  
+
+
 ![fumo](fumo.gif)
