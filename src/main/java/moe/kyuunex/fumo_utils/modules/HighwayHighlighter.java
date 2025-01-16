@@ -53,7 +53,7 @@ public class HighwayHighlighter extends Module {
     );
 
     private final Setting<YDirection> yMultiplier = sgStraight.add(new EnumSetting.Builder<YDirection>()
-        .name("x-direction")
+        .name("y-direction")
         .description("Y direction")
         .defaultValue(YDirection.CENTER)
         .build()
