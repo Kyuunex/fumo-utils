@@ -22,17 +22,21 @@ public class FumoUtils extends MeteorAddon {
         LOG.info("Initializing FumoUtils");
 
         // Modules
+        Modules.get().add(new AltitudeStabilizer());
         Modules.get().add(new AutoDump());
         Modules.get().add(new ChatNotifier());
         Modules.get().add(new DoujinDupe());
         Modules.get().add(new ElytraWatch());
+        Modules.get().add(new FumoVoidESP());
         Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new ItemESP());
         Modules.get().add(new MapHighlighter());
         Modules.get().add(new QuartzFarmer());
         Modules.get().add(new RegionFileHighlighter());
+        Modules.get().add(new Undead());
         Modules.get().add(new UnSilkToucher());
         Modules.get().add(new WebhookBridge());
+        Modules.get().add(new WireproxyIntegration());
 
         // Commands
         Commands.add(new ChatCooker());
