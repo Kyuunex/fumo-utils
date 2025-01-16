@@ -12,6 +12,7 @@ Public edition of FumoUtils.
 - ChatNotifier
 - DoujinDupe
 - ElytraWatch
+- FumoVoidESP
 - HighwayHighlighter
 - ItemESP
 - MapHighlighter
