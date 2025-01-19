@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class WireproxyIntegration extends Module {
+public class WireGuardIntegration extends Module {
     private Process wpProcess;
     private File tmpConfigfile;
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
@@ -35,7 +35,7 @@ public class WireproxyIntegration extends Module {
 
     private final Setting<String> wireguardConfigDirectory = sgGeneral.add(new StringSetting.Builder()
         .name("wireguard-config-directory")
-        .description("Full path to your wireguard config directory")
+        .description("Full path to your wireguard config directory. Must contain files named UUID followed by .conf")
         .defaultValue("/home/user/Documents/mc-wg/")
         .build()
     );
@@ -61,33 +61,32 @@ public class WireproxyIntegration extends Module {
         .build()
     );
 
-    public WireproxyIntegration() {
+    public WireGuardIntegration() {
         super(
             FumoUtils.CATEGORY,
-            "wireproxy-integration",
-            "Load up a wireproxy instance depending on the current account"
+            "WireGuard-integration",
+            "WireGuard integration via wireproxy. Loads up a wireproxy instance depending on the current account."
         );
         this.runInMainMenu = true;
     }
 
     @Override
     public void onActivate() {
-        startWireProxy();
+        startInstance();
     }
 
     @Override
     public void onDeactivate() {
-        destroyWireProxy();
+        destroyInstance();
     }
-
-
-    public void startWireProxy() {
+    
+    public void startInstance() {
         if (!Files.exists(Path.of(wireproxyExecutable.get()))) {
             FumoUtils.LOG.info("The wireproxy executable at: {} does not exist !!!! Baka Baka", wireproxyExecutable.get());
             return;
         }
 
-        FumoUtils.LOG.info("Starting wireproxy integration.");
+        FumoUtils.LOG.info("Starting WireGuard integration.");
 
         String tmpConfigFileTemplate = "WGConfig = %s\n[Socks5]\nBindAddress = 127.0.0.1:%s";
         String wgConfigDirectory = wireguardConfigDirectory.get();
@@ -121,13 +120,13 @@ public class WireproxyIntegration extends Module {
 
             currentlyActiveAccount.set(gameProfile.getName());
 
-            FumoUtils.LOG.info("Wireproxy integration finished loading.");
+            FumoUtils.LOG.info("WireGuard integration finished loading.");
         } catch (IOException ignored) {
         }
 
     }
 
-    public void destroyWireProxy() {
+    public void destroyInstance() {
         if (wpProcess != null) {
             wpProcess.descendants().forEach(ProcessHandle::destroy);
             wpProcess.destroy();
@@ -146,6 +145,6 @@ public class WireproxyIntegration extends Module {
         currentlyActiveAccount.reset();
         temporaryConfigFile.reset();
         accountWireguardConfigFile.reset();
-        FumoUtils.LOG.info("Deactivated wireproxy integration.");
+        FumoUtils.LOG.info("Deactivated WireGuard integration.");
     }
 }
