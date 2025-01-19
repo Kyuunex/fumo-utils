@@ -20,7 +20,7 @@ Public edition of FumoUtils.
 - RegionFileHighlighter
 - UnSilkToucher
 - WebhookBridge
-- WireproxyIntegration
+- WireGuardIntegration
 
 ### Available commands:
 - ChatCooker

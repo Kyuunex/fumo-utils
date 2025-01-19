@@ -36,7 +36,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new Undead());
         Modules.get().add(new UnSilkToucher());
         Modules.get().add(new WebhookBridge());
-        Modules.get().add(new WireproxyIntegration());
+        Modules.get().add(new WireGuardIntegration());
 
         // Commands
         Commands.add(new ChatCooker());
