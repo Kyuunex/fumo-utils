@@ -30,6 +30,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new FumoVoidESP());
         Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new ItemESP());
+        Modules.get().add(new Karaoke());
         Modules.get().add(new MapHighlighter());
         Modules.get().add(new QuartzFarmer());
         Modules.get().add(new RegionFileHighlighter());
