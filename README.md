@@ -15,6 +15,7 @@ Public edition of FumoUtils.
 - FumoVoidESP
 - HighwayHighlighter
 - ItemESP
+- Karaoke
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
