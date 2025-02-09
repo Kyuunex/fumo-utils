@@ -7,8 +7,6 @@ import net.minecraft.command.CommandSource;
 
 import java.util.Random;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class ChatCooker extends Command {
     private static final Random random = new Random(System.currentTimeMillis());
 

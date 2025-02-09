@@ -9,8 +9,6 @@ import net.minecraft.text.Text;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
