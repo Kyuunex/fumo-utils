@@ -50,7 +50,7 @@ public class AltitudeStabilizer extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         assert mc.player != null;
-        if (!mc.player.isFallFlying()) {
+        if (!mc.player.isGliding()) {
             return;
         }
 

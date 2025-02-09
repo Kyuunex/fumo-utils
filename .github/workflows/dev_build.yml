@@ -7,8 +7,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Wrapper Validation
-        uses: gradle/actions/wrapper-validation@v3
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -20,8 +18,8 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          automatic_release_tag: devbuild-1.21.1
+          automatic_release_tag: devbuild-1.21.4
           prerelease: false
-          title: Dev Build (1.21.1)
+          title: Dev Build (1.21.4)
           files: |
             ./build/libs/*.jar
