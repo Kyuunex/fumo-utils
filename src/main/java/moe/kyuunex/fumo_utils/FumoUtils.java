@@ -42,8 +42,9 @@ public class FumoUtils extends MeteorAddon {
 
         // Commands
         Commands.add(new ChatCooker());
-        Commands.add(new PrintTPS());
         Commands.add(new OfflineUUIDGen());
+        Commands.add(new PrintRemoteIP());
+        Commands.add(new PrintTPS());
     }
 
     @Override
