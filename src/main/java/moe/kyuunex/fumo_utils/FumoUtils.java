@@ -29,6 +29,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new ElytraWatch());
         Modules.get().add(new FumoVoidESP());
         Modules.get().add(new HighwayHighlighter());
+        Modules.get().add(new IgnoreUsers());
         Modules.get().add(new ItemESP());
         Modules.get().add(new Karaoke());
         Modules.get().add(new MapHighlighter());
@@ -42,6 +43,7 @@ public class FumoUtils extends MeteorAddon {
 
         // Commands
         Commands.add(new ChatCooker());
+        Commands.add(new Ignore());
         Commands.add(new OfflineUUIDGen());
         Commands.add(new PrintRemoteIP());
         Commands.add(new PrintTPS());
