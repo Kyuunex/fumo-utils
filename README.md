@@ -2,7 +2,7 @@
 Public edition of FumoUtils.
 
 ### Requirements
-- Minecraft 1.21.1
+- Minecraft 1.21.4
 - Fabric loader
 - Meteor Client
 
@@ -14,18 +14,22 @@ Public edition of FumoUtils.
 - ElytraWatch
 - FumoVoidESP
 - HighwayHighlighter
+- IgnoreUsers
 - ItemESP
 - Karaoke
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
+- TPSLogger
 - UnSilkToucher
 - WebhookBridge
 - WireGuardIntegration
 
 ### Available commands:
 - ChatCooker
+- Ignore
 - OfflineUUIDGen
+- PrintRemoteIP
 - PrintTPS
 
 ### Credits
