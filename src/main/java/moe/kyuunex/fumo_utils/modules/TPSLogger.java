@@ -17,11 +17,13 @@ public class TPSLogger extends Module {
         .name("interval")
         .description("Interval in client side ticks")
         .defaultValue(20)
+        .range(0, 2000)
+        .sliderRange(10, 200)
         .build()
     );
 
     public TPSLogger() {
-        super(FumoUtils.CATEGORY, "tps-logger", "Logs TPS in chat.");
+        super(FumoUtils.CATEGORY, "TPS-logger", "Logs TPS in chat.");
     }
 
     @EventHandler
@@ -34,4 +36,3 @@ public class TPSLogger extends Module {
         tickTrack++;
     }
 }
-
