@@ -19,6 +19,7 @@ Public edition of FumoUtils.
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
+- TPSLogger
 - UnSilkToucher
 - WebhookBridge
 - WireGuardIntegration
