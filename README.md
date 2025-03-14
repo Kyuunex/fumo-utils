@@ -10,6 +10,7 @@ Public edition of FumoUtils.
 - AltitudeStabilizer
 - AutoDump
 - ChatNotifier
+- DoujinDupe
 - ElytraWatch
 - FumoVoidESP
 - HighwayHighlighter
