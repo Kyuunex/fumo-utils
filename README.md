@@ -21,6 +21,7 @@ Public edition of FumoUtils.
 - QuartzFarmer
 - RegionFileHighlighter
 - TPSLogger
+- TridentDupe
 - Undead
 - UnSilkToucher
 - WebhookBridge
