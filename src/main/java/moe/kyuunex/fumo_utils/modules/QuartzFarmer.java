@@ -11,22 +11,21 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import moe.kyuunex.fumo_utils.FumoUtils;
 
 public class QuartzFarmer extends Module {
@@ -77,7 +76,7 @@ public class QuartzFarmer extends Module {
         .build()
     );
 
-    private final VoxelShape SHAPE = Block.createCuboidShape(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
+    private final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
 
     private BlockPos target;
 
@@ -99,13 +98,13 @@ public class QuartzFarmer extends Module {
     private void onTick(TickEvent.Pre event) {
         // Finding target pos
         if (target == null) {
-            if (mc.crosshairTarget == null || mc.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
+            if (mc.hitResult == null || mc.hitResult.getType() != HitResult.Type.BLOCK) return;
 
-            BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos().up();
-            BlockState state = mc.world.getBlockState(pos);
+            BlockPos pos = ((BlockHitResult) mc.hitResult).getBlockPos().above();
+            BlockState state = mc.level.getBlockState(pos);
 
-            if (state.isReplaceable() || state.getBlock() == Blocks.NETHER_QUARTZ_ORE) {
-                target = ((BlockHitResult) mc.crosshairTarget).getBlockPos().up();
+            if (state.canBeReplaced() || state.getBlock() == Blocks.NETHER_QUARTZ_ORE) {
+                target = ((BlockHitResult) mc.hitResult).getBlockPos().above();
             } else return;
         }
 
@@ -118,27 +117,27 @@ public class QuartzFarmer extends Module {
 
         // Toggle if quartz amount reached
         if (selfToggle.get()) {
-            assert mc.player != null;
+            if (mc.player == null) return;
             ItemStack itemStack = mc.player.getInventory().armor.get(2);
 
-            if (itemStack.getDamage() == 0) {
+            if (itemStack.getDamageValue() == 0) {
                 InvUtils.swapBack();
                 toggle();
-                info(Text.literal(itemStack.getName().getString() + " is fully repaired, disabling."));
+                info(Component.literal(itemStack.getHoverName().getString() + " is fully repaired, disabling."));
                 return;
             }
         }
 
         // Break existing Quartz Ore at target pos
-        if (mc.world.getBlockState(target).getBlock() == Blocks.NETHER_QUARTZ_ORE) {
+        if (mc.level.getBlockState(target).getBlock() == Blocks.NETHER_QUARTZ_ORE) {
             double bestScore = -1;
             int bestSlot = -1;
 
             for (int i = 0; i < 9; i++) {
-                ItemStack itemStack = mc.player.getInventory().getStack(i);
+                ItemStack itemStack = mc.player.getInventory().getItem(i);
                 if (Utils.hasEnchantment(itemStack, Enchantments.SILK_TOUCH)) continue;
 
-                double score = itemStack.getMiningSpeedMultiplier(Blocks.NETHER_QUARTZ_ORE.getDefaultState());
+                double score = itemStack.getDestroySpeed(Blocks.NETHER_QUARTZ_ORE.defaultBlockState());
 
                 if (score > bestScore) {
                     bestScore = score;
@@ -153,7 +152,7 @@ public class QuartzFarmer extends Module {
         }
 
         // Place Quartz Ore if the target pos is empty
-        if (mc.world.getBlockState(target).isReplaceable()) {
+        if (mc.level.getBlockState(target).canBeReplaced()) {
             FindItemResult quartz_ore = InvUtils.findInHotbar(Items.NETHER_QUARTZ_ORE);
 
             if (!quartz_ore.found()) {
@@ -170,7 +169,7 @@ public class QuartzFarmer extends Module {
     private void onRender(Render3DEvent event) {
         if (target == null || !render.get() || Modules.get().get(PacketMine.class).isMiningBlock(target)) return;
 
-        Box box = SHAPE.getBoundingBoxes().getFirst();
+        AABB box = SHAPE.toAabbs().getFirst();
         event.renderer.box(target.getX() + box.minX, target.getY() + box.minY, target.getZ() + box.minZ, target.getX() + box.maxX, target.getY() + box.maxY, target.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

@@ -79,7 +79,7 @@ public class WireGuardIntegration extends Module {
     public void onDeactivate() {
         destroyInstance();
     }
-
+    
     public void startInstance() {
         if (!Files.exists(Path.of(wireproxyExecutable.get()))) {
             FumoUtils.LOG.info("The wireproxy executable at: {} does not exist !!!! Baka Baka", wireproxyExecutable.get());

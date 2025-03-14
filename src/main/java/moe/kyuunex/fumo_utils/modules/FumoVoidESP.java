@@ -17,16 +17,16 @@ import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.List;
 public class FumoVoidESP extends Module {
     private static final Direction[] SIDES = {Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST};
 
-    private final SoundEvent defaultNotificationSound = SoundEvents.BLOCK_AMETHYST_BLOCK_RESONATE;
+    private final SoundEvent defaultNotificationSound = SoundEvents.AMETHYST_BLOCK_RESONATE;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
@@ -114,7 +114,7 @@ public class FumoVoidESP extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+    private final BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 
     private final Pool<Void> voidHolePool = new Pool<>(Void::new);
     private final List<Void> voidHoles = new ArrayList<>();
@@ -141,14 +141,14 @@ public class FumoVoidESP extends Module {
         voidHoles.clear();
         if (PlayerUtils.getDimension() == Dimension.End) return;
 
-        int px = mc.player.getBlockPos().getX();
-        int pz = mc.player.getBlockPos().getZ();
+        int px = mc.player.blockPosition().getX();
+        int pz = mc.player.blockPosition().getZ();
         int radius = horizontalRadius.get();
 
         for (int x = px - radius; x <= px + radius; x++) {
             for (int z = pz - radius; z <= pz + radius; z++) {
-                blockPos.set(x, mc.world.getBottomY(), z);
-                if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.world.getBottomY(), z), false));
+                blockPos.set(x, mc.level.getMinBuildHeight(), z);
+                if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.level.getMinBuildHeight(), z), false));
 
                 // Check for nether roof
                 if (netherRoof.get() && PlayerUtils.getDimension() == Dimension.Nether) {
@@ -160,7 +160,7 @@ public class FumoVoidESP extends Module {
 
         if (!voidHoles.isEmpty()){
             if (enableSound.get()){
-                assert mc.world != null;
+                if (mc.level == null) return;
 
                 SoundEvent notificationSound;
 
@@ -171,9 +171,9 @@ public class FumoVoidESP extends Module {
                 }
 
                 if(tickTrack == 0 || tickTrack == 3 || tickTrack == 6 || tickTrack == 9){
-                    mc.world.playSoundFromEntity(
+                    mc.level.playSound(
                         mc.player, mc.player,
-                        notificationSound, SoundCategory.VOICE,
+                        notificationSound, SoundSource.VOICE,
                         3.0F, 1.0F
                     );
                 }
@@ -183,7 +183,7 @@ public class FumoVoidESP extends Module {
             }
 
             if(!isNotified) {
-                info(Text.literal("Void Holes found!"));
+                info(Component.literal("Void Holes found!"));
                 isNotified = true;
             }
         } else {
@@ -197,7 +197,7 @@ public class FumoVoidESP extends Module {
     }
 
     private boolean isBlockWrong(BlockPos blockPos) {
-        Chunk chunk = mc.world.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
+        ChunkAccess chunk = mc.level.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
         if (chunk == null) return true;
 
         Block block = chunk.getBlockState(blockPos).getBlock();
@@ -206,9 +206,9 @@ public class FumoVoidESP extends Module {
         return block == Blocks.BEDROCK;
     }
 
-    private boolean isHole(BlockPos.Mutable blockPos, boolean nether) {
+    private boolean isHole(BlockPos.MutableBlockPos blockPos, boolean nether) {
         for (int i = 0; i < holeHeight.get(); i++) {
-            blockPos.setY(nether ? 127 - i : mc.world.getBottomY());
+            blockPos.setY(nether ? 127 - i : mc.level.getMinBuildHeight());
             if (isBlockWrong(blockPos)) return false;
         }
 
@@ -219,7 +219,7 @@ public class FumoVoidESP extends Module {
         private int x, y, z;
         private int excludeDir;
 
-        public Void set(BlockPos.Mutable blockPos, boolean nether) {
+        public Void set(BlockPos.MutableBlockPos blockPos, boolean nether) {
             x = blockPos.getX();
             y = blockPos.getY();
             z = blockPos.getZ();
@@ -227,7 +227,7 @@ public class FumoVoidESP extends Module {
             excludeDir = 0;
 
             for (Direction side : SIDES) {
-                blockPos.set(x + side.getOffsetX(), y, z + side.getOffsetZ());
+                blockPos.set(x + side.getStepX(), y, z + side.getStepZ());
                 if (isHole(blockPos, nether)) excludeDir |= Dir.get(side);
             }
 
