@@ -20,6 +20,7 @@ Public edition of FumoUtils.
 - QuartzFarmer
 - RegionFileHighlighter
 - TPSLogger
+- Undead
 - UnSilkToucher
 - WebhookBridge
 - WireGuardIntegration
