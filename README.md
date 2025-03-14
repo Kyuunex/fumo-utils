@@ -21,6 +21,7 @@ to enhance your anarchy Minecraft experience.
 - QuartzFarmer
 - RegionFileHighlighter
 - TPSLogger
+- TridentDupe
 - Undead
 - UnSilkToucher
 - WebhookBridge
