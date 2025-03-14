@@ -7,7 +7,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.client.gui.screens.DeathScreen;
 
 
 public class Undead extends Module {
@@ -32,9 +32,9 @@ public class Undead extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.currentScreen instanceof DeathScreen) {
+        if (mc.screen instanceof DeathScreen) {
             mc.setScreen(null);
-            assert mc.player != null;
+            if (mc.player == null) return;
 
             if(resetDeathTime.get()){
                 mc.player.deathTime = 0;

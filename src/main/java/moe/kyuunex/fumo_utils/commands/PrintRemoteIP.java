@@ -2,24 +2,24 @@ package moe.kyuunex.fumo_utils.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.text.Text;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
 
 public class PrintRemoteIP extends Command {
     public PrintRemoteIP() {
-        super("print_remote_ip", "Prints the remote IP address");
+        super("print-remote-ip", "Prints the remote IP address");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
-            if (mc.getNetworkHandler() == null) return SINGLE_SUCCESS;
+            if (mc.getConnection() == null) return SINGLE_SUCCESS;
 
-            ClientConnection connection = mc.getNetworkHandler().getConnection();
-            String ip = connection.channel.remoteAddress().toString();
+            Connection connection = mc.getConnection().getConnection();
+            String ip = connection.getLoggableAddress(true);
 
-            info(Text.literal(String.valueOf(ip)));
+            info(Component.literal(String.valueOf(ip)));
             return SINGLE_SUCCESS;
         });
     }

@@ -14,13 +14,13 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.util.Mth;
 import org.joml.Vector3d;
 
 import java.util.List;
@@ -131,7 +131,7 @@ public class ItemESP extends Module {
 
         count = 0;
 
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (shouldSkip(entity)) continue;
 
             if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) drawBoundingBox(event, entity);
@@ -147,11 +147,11 @@ public class ItemESP extends Module {
         }
 
         if (mode.get() == Mode.Box) {
-            double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-            double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-            double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
+            double x = Mth.lerp(event.tickDelta, entity.xOld, entity.getX()) - entity.getX();
+            double y = Mth.lerp(event.tickDelta, entity.yOld, entity.getY()) - entity.getY();
+            double z = Mth.lerp(event.tickDelta, entity.zOld, entity.getZ()) - entity.getZ();
 
-            Box box = entity.getBoundingBox();
+            AABB box = entity.getBoundingBox();
             event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
         } else {
             WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
@@ -167,14 +167,14 @@ public class ItemESP extends Module {
         Renderer2D.COLOR.begin();
         count = 0;
 
-        for (Entity entity : mc.world.getEntities()) {
+        for (Entity entity : mc.level.entitiesForRendering()) {
             if (shouldSkip(entity)) continue;
 
-            Box box = entity.getBoundingBox();
+            AABB box = entity.getBoundingBox();
 
-            double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
-            double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()) - entity.getY();
-            double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()) - entity.getZ();
+            double x = Mth.lerp(event.tickDelta, entity.xOld, entity.getX()) - entity.getX();
+            double y = Mth.lerp(event.tickDelta, entity.yOld, entity.getY()) - entity.getY();
+            double z = Mth.lerp(event.tickDelta, entity.zOld, entity.getZ()) - entity.getZ();
 
             // Check corners
             pos1.set(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
@@ -239,8 +239,8 @@ public class ItemESP extends Module {
     public boolean shouldSkip(Entity entity) {
         if (entity.getType() != EntityType.ITEM) return true;
         if (!(entity instanceof ItemEntity itemEntity)) return true;
-        if (!targetItems.get().contains(itemEntity.getStack().getItem())) return true;
-        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
+        if (!targetItems.get().contains(itemEntity.getItem().getItem())) return true;
+        if (entity == mc.cameraEntity && mc.options.getCameraType().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 
@@ -253,7 +253,7 @@ public class ItemESP extends Module {
     }
 
     private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
+        double dist = PlayerUtils.squaredDistanceToCamera(entity.getX() + entity.getBbWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getBbWidth() / 2);
         double fadeDist = Math.pow(fadeDistance.get(), 2);
         double alpha = 1;
         if (dist <= fadeDist * fadeDist) alpha = (float) (Math.sqrt(dist) / fadeDist);
@@ -265,7 +265,7 @@ public class ItemESP extends Module {
         if (distance.get()) {
             return EntityUtils.getColorFromDistance(entity);
         } else {
-            entity.getType().getSpawnGroup();
+            entity.getType().getCategory();
             return miscColor.get();
         }
     }

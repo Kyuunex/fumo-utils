@@ -8,7 +8,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.phys.Vec3;
 
 public class RegionFileHighlighter extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
@@ -56,9 +56,9 @@ public class RegionFileHighlighter extends Module {
 
     @EventHandler
     private void onRender3d(Render3DEvent event) {
-        assert mc.player != null;
+        if (mc.player == null) return;
         double yLevelToUse;
-        Vec3d pos = mc.player.getPos();
+        Vec3 pos = mc.player.position();
 
         if (feetYLevel.get()) {
             yLevelToUse = pos.y - 1;

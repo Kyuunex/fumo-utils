@@ -3,7 +3,7 @@ package moe.kyuunex.fumo_utils.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Random;
 
@@ -11,28 +11,28 @@ public class ChatCooker extends Command {
     private static final Random random = new Random(System.currentTimeMillis());
 
     public ChatCooker() {
-        super("chat_cooker", "Generate and send text in chat.");
+        super("chat-cooker", "Generate and send text in chat.");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(literal("unicode").then(argument("length", IntegerArgumentType.integer()).executes(context -> {
             int length = IntegerArgumentType.getInteger(context, "length");
 
-            assert mc.player != null;
-            assert mc.getNetworkHandler() != null;
+            if (mc.player == null) return -1;
+            if (mc.getConnection() == null) return -1;
 
-            mc.getNetworkHandler().sendChatMessage(randomText(length, true));
+            mc.getConnection().sendChat(randomText(length, true));
             return SINGLE_SUCCESS;
         })));
 
         builder.then(literal("ascii").then(argument("length", IntegerArgumentType.integer()).executes(context -> {
             int length = IntegerArgumentType.getInteger(context, "length");
 
-            assert mc.player != null;
-            assert mc.getNetworkHandler() != null;
+            if (mc.player == null) return -1;
+            if (mc.getConnection() == null) return -1;
 
-            mc.getNetworkHandler().sendChatMessage(randomText(length, false));
+            mc.getConnection().sendChat(randomText(length, false));
             return SINGLE_SUCCESS;
         })));
     }

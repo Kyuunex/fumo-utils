@@ -4,7 +4,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 
 import java.util.List;
@@ -25,22 +25,32 @@ public class IgnoreUsers extends Module {
         .build()
     );
 
+    private final Setting<String> whisperFormat = sgDefault.add(new StringSetting.Builder()
+        .name("whisper-message-format")
+        .description("Whisper message format specific to the server")
+        .defaultValue("From %s:")
+        .build()
+    );
+
     public IgnoreUsers() {
         super(FumoUtils.CATEGORY, "ignore", "Ignore users in chat, client side. Use '.ignore' to add users");
     }
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        Text message = event.getMessage();
+        Component message = event.getMessage();
 
-        String messageString = message.getString();
+        String messageString = message.getString().toLowerCase();
         for (String ignoredUser : ignoredUsers.get()) {
-            if (messageString.startsWith(messageFormat.get().formatted(ignoredUser))) {
+            if (
+                messageString.startsWith((messageFormat.get().formatted(ignoredUser)).toLowerCase()) ||
+                messageString.startsWith((whisperFormat.get().formatted(ignoredUser)).toLowerCase())
+            ) {
                 event.cancel();
                 return;
             }
         }
 
-        event.setMessage(message);
+        // event.setMessage(message);
     }
 }

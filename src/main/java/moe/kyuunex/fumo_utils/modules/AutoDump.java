@@ -9,9 +9,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.inventory.MenuType;
 
 public class AutoDump extends Module {
     private final SettingGroup sgDefault = settings.getDefaultGroup();
@@ -48,12 +48,12 @@ public class AutoDump extends Module {
                     Items.BLACK_SHULKER_BOX
                 )
                 .build());
-    public final Setting<List<ScreenHandlerType<?>>> screens =
+    public final Setting<List<MenuType<?>>> screens =
         sgDefault.add(
             new ScreenHandlerListSetting.Builder()
                 .name("screens")
                 .description("The screens to dump items into.")
-                .defaultValue(List.of(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
+                .defaultValue(List.of(MenuType.GENERIC_9x3, MenuType.GENERIC_9x6))
                 .build());
 
     public AutoDump() {
@@ -70,9 +70,9 @@ public class AutoDump extends Module {
 
         for (int i = SlotUtils.indexToId(SlotUtils.MAIN_START); i < SlotUtils.indexToId(SlotUtils.MAIN_START) + 4 * 9; i++) {
             if (r >= rate.get()) break;
-            assert mc.player != null;
-            if (!mc.player.currentScreenHandler.getSlot(i).hasStack()) continue;
-            if (!items.get().contains(mc.player.currentScreenHandler.getSlot(i).getStack().getItem())) continue;
+            if (mc.player == null) return;
+            if (!mc.player.containerMenu.getSlot(i).hasItem()) continue;
+            if (!items.get().contains(mc.player.containerMenu.getSlot(i).getItem().getItem())) continue;
 
             r++;
             InvUtils.shiftClick().slotId(i);
@@ -81,7 +81,7 @@ public class AutoDump extends Module {
 
     public boolean canUseScreen() {
         try {
-            return mc.player != null && screens.get().contains(mc.player.currentScreenHandler.getType());
+            return mc.player != null && screens.get().contains(mc.player.containerMenu.getType());
         } catch (Exception e) {
             return false;
         }

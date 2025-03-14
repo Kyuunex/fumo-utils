@@ -50,22 +50,22 @@ public class AltitudeStabilizer extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         assert mc.player != null;
-        if (!mc.player.isGliding()) {
+        if (!mc.player.isFallFlying()) {
             return;
         }
 
         Setting<Double> yLevel;
 
-        if (mc.player.clientWorld.getDimension().respawnAnchorWorks()){
+        if (mc.player.clientLevel.dimensionType().respawnAnchorWorks()){
             yLevel = yLevelNether;
         } else {
             yLevel = yLevelOwEnd;
         }
 
-        if (mc.player.getPos().getY() < yLevel.get()){
-            mc.player.setPitch(correctionPitch.get().floatValue());
+        if (mc.player.getY() < yLevel.get()){
+            mc.player.setXRot(correctionPitch.get().floatValue());
         } else {
-            mc.player.setPitch(normalPitch.get().floatValue());
+            mc.player.setXRot(normalPitch.get().floatValue());
         }
     }
 }

@@ -7,7 +7,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import moe.kyuunex.fumo_utils.modules.IgnoreUsers;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 public class Ignore extends Command {
     public Ignore() {
@@ -15,11 +15,11 @@ public class Ignore extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(this::ignore));
     }
 
-    private int ignore(CommandContext<CommandSource> context) {
+    private int ignore(CommandContext<SharedSuggestionProvider> context) {
         GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
 
         IgnoreUsers ignoreModule = Modules.get().get(IgnoreUsers.class);
