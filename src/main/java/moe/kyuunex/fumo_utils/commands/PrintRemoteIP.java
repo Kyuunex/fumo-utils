@@ -3,18 +3,23 @@ package moe.kyuunex.fumo_utils.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import net.minecraft.commands.SharedSuggestionProvider;
-import meteordevelopment.meteorclient.utils.world.TickRate;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 
-public class PrintTPS extends Command {
-    public PrintTPS() {
-        super("print-tps", "Prints the tps in chat");
+public class PrintRemoteIP extends Command {
+    public PrintRemoteIP() {
+        super("print-remote-ip", "Prints the remote IP address");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
         builder.executes(context -> {
-            info(Component.literal(String.valueOf(TickRate.INSTANCE.getTickRate())));
+            if (mc.getConnection() == null) return SINGLE_SUCCESS;
+
+            Connection connection = mc.getConnection().getConnection();
+            String ip = connection.getLoggableAddress(true);
+
+            info(Component.literal(String.valueOf(ip)));
             return SINGLE_SUCCESS;
         });
     }

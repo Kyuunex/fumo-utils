@@ -5,8 +5,8 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.text.*;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.network.chat.Component;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import moe.kyuunex.fumo_utils.utils.Webhook;
 
@@ -35,7 +35,7 @@ public class WebhookBridge extends Module {
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        Text message = event.getMessage();
+        Component message = event.getMessage();
         String messageString = message.getString();
 
         for (String string : blacklist.get()){
@@ -47,9 +47,9 @@ public class WebhookBridge extends Module {
         Webhook.sendAsync(webhookUrl.get(), getServerName(), messageString);
     }
     private String getServerName(){
-        ServerInfo server = mc.getCurrentServerEntry();
+        ServerData server = mc.getCurrentServer();
         if (server == null) return "Meteor Client";
 
-        return server.address;
+        return server.ip;
     }
 }

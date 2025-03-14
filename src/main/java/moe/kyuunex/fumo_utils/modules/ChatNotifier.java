@@ -7,11 +7,11 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.*;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import moe.kyuunex.fumo_utils.utils.Webhook;
 
@@ -66,7 +66,7 @@ public class ChatNotifier extends Module {
     private final Setting<List<SoundEvent>> notificationSound = sgSound.add(new SoundEventListSetting.Builder()
         .name("notification-sound")
         .description("Notification sound. PICK ONLY ONE!")
-        .defaultValue(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP)
+        .defaultValue(SoundEvents.EXPERIENCE_ORB_PICKUP)
         .build()
     );
 
@@ -90,10 +90,10 @@ public class ChatNotifier extends Module {
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        Text message = event.getMessage();
+        Component message = event.getMessage();
         String messageString = message.getString();
 
-        assert mc.player != null;
+        if (mc.player == null) return;
         if (!notifyOnOwnMessages.get()){
             if (messageString.startsWith("<" + mc.player.getName().getString() + ">")) {
                 return;
@@ -127,8 +127,9 @@ public class ChatNotifier extends Module {
             return;
         }
 
-        assert mc.world != null;
-        mc.world.playSoundFromEntity(mc.player, mc.player, notificationSound.get().getFirst(), SoundCategory.VOICE, 3.0F, 1.0F);
+        if (mc.level == null) return;
+        if (mc.player == null) return;
+        mc.level.playSound(mc.player, mc.player, notificationSound.get().getFirst(), SoundSource.VOICE, 3.0F, 1.0F);
     }
 
     private void sendWebhookNotification(String webhookUrl, String message) {
@@ -140,9 +141,9 @@ public class ChatNotifier extends Module {
     }
 
     private String getServerName(){
-        ServerInfo server = mc.getCurrentServerEntry();
+        ServerData server = mc.getCurrentServer();
         if (server == null) return "Meteor Client";
 
-        return server.address;
+        return server.ip;
     }
 }

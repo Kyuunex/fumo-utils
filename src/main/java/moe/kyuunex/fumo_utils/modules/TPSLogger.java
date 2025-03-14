@@ -36,4 +36,3 @@ public class TPSLogger extends Module {
         tickTrack++;
     }
 }
-

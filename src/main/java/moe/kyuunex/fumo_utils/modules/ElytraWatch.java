@@ -6,19 +6,19 @@ import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.utils.DisconnectUtils;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.network.chat.Component;
 import java.util.List;
 
 public class ElytraWatch extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private final SettingGroup sgSound = settings.createGroup("Sound");
-    private final SoundEvent defaultNotificationSound = SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP;
+    private final SoundEvent defaultNotificationSound = SoundEvents.EXPERIENCE_ORB_PICKUP;
     private int tickTrack = 0;
     private boolean isNotified = false;
 
@@ -68,24 +68,27 @@ public class ElytraWatch extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        assert mc.player != null;
-        ItemStack chestStack = mc.player.getInventory().getArmorStack(2);
+        if (mc.player == null) return;
+        ItemStack chestStack = mc.player.getInventory().getArmor(2);
         boolean isWearingElytra = chestStack.getItem() == Items.ELYTRA;
-        if (isWearingElytra && chestStack.getMaxDamage() - chestStack.getDamage() <= durabilityThreshold.get()){
+        if (isWearingElytra && chestStack.getMaxDamage() - chestStack.getDamageValue() <= durabilityThreshold.get()){
             String alertMsg = "Elytra durability is bellow threshold; ";
 
             if(!isNotified) {
-                info(Text.literal(alertMsg));
+                info(Component.literal(alertMsg));
                 isNotified = true;
             }
 
             if(disconnect.get()){
-                ClientPlayNetworkHandler network = mc.getNetworkHandler();
-                DisconnectUtils.disconnect(network, Text.literal("[ElytraWatch] " + alertMsg + "Disconnecting;"));
+                ClientPacketListener network = mc.getConnection();
+                DisconnectUtils.disconnect(
+                    network,
+                    Component.literal("[ElytraWatch] " + alertMsg + "Disconnecting;")
+                );
             }
 
             if(enableSound.get()) {
-                assert mc.world != null;
+                if (mc.level == null) return;
                 SoundEvent notificationSound;
 
                 if(soundSetting.get().isEmpty()) {
@@ -95,8 +98,8 @@ public class ElytraWatch extends Module {
                 }
 
                 if(tickTrack == 0 || tickTrack == 3 || tickTrack == 6 || tickTrack == 9){
-                    mc.world.playSoundFromEntity(
-                        mc.player, mc.player, notificationSound, SoundCategory.VOICE, 3.0F, 1.0F
+                    mc.level.playSound(
+                        mc.player, mc.player, notificationSound, SoundSource.VOICE, 3.0F, 1.0F
                     );
                 }
 
