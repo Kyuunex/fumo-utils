@@ -178,6 +178,6 @@ public class DoujinDupe extends Module {
     public void sendPacket(Packet<?> packet) {
         ClientPacketListener network = mc.getConnection();
         if (network == null) return;
-        network.send(packet);
+        network.getConnection().send(packet, null, true);
     }
 }
