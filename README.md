@@ -11,6 +11,7 @@ to enhance your anarchy Minecraft experience.
 - AltitudeStabilizer
 - AutoDump
 - ChatNotifier
+- DCNotify
 - ElytraWatch
 - FumoVoidESP
 - HighwayHighlighter
