@@ -13,6 +13,7 @@ to enhance your anarchy Minecraft experience.
 - ChatNotifier
 - DCNotify
 - ElytraWatch
+- ForceRaining
 - FumoVoidESP
 - HighwayHighlighter
 - IgnoreUsers
