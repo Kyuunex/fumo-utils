@@ -23,9 +23,12 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new AltitudeStabilizer());
         Modules.get().add(new AutoDump());
         Modules.get().add(new ChatNotifier());
+        Modules.get().add(new DCNotify());
         Modules.get().add(new DoujinDupe());
         Modules.get().add(new ElytraWatch());
+        Modules.get().add(new ForceRaining());
         Modules.get().add(new FumoVoidESP());
+        Modules.get().add(new Geofence());
         Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new IgnoreUsers());
         Modules.get().add(new ItemESP());
@@ -33,6 +36,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new MapHighlighter());
         Modules.get().add(new QuartzFarmer());
         Modules.get().add(new RegionFileHighlighter());
+        Modules.get().add(new SleepAura());
         Modules.get().add(new TPSLogger());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Undead());

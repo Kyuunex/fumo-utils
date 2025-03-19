@@ -2,7 +2,7 @@
 Public edition of FumoUtils.
 
 ### Requirements
-- Minecraft 1.21.4
+- Minecraft 1.21.1
 - Fabric loader
 - Meteor Client
 
@@ -10,9 +10,12 @@ Public edition of FumoUtils.
 - AltitudeStabilizer
 - AutoDump
 - ChatNotifier
+- DCNotify
 - DoujinDupe
 - ElytraWatch
+- ForceRaining
 - FumoVoidESP
+- Geofence
 - HighwayHighlighter
 - IgnoreUsers
 - ItemESP
@@ -20,6 +23,7 @@ Public edition of FumoUtils.
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
+- SleepAura
 - TPSLogger
 - TridentDupe
 - Undead
