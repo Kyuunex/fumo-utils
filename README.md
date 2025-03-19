@@ -15,6 +15,7 @@ to enhance your anarchy Minecraft experience.
 - ElytraWatch
 - ForceRaining
 - FumoVoidESP
+- Geofence
 - HighwayHighlighter
 - IgnoreUsers
 - ItemESP

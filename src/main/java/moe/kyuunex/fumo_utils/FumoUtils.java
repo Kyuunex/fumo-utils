@@ -28,6 +28,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new ElytraWatch());
         Modules.get().add(new ForceRaining());
         Modules.get().add(new FumoVoidESP());
+        Modules.get().add(new Geofence());
         Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new IgnoreUsers());
         Modules.get().add(new ItemESP());
