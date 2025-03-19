@@ -21,6 +21,7 @@ to enhance your anarchy Minecraft experience.
 - MapHighlighter
 - QuartzFarmer
 - RegionFileHighlighter
+- SleepAura
 - TPSLogger
 - TridentDupe
 - Undead

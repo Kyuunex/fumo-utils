@@ -34,6 +34,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new MapHighlighter());
         Modules.get().add(new QuartzFarmer());
         Modules.get().add(new RegionFileHighlighter());
+        Modules.get().add(new SleepAura());
         Modules.get().add(new TPSLogger());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Undead());
