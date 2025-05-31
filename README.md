@@ -9,6 +9,7 @@ Public edition of FumoUtils.
 ### Available modules:
 - AltitudeStabilizer
 - AreaHighlighter
+- AutoDropJunk
 - AutoDump
 - ChatNotifier
 - DCNotify
