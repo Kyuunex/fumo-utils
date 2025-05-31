@@ -51,7 +51,7 @@ public class IgnoreUsers extends Module {
         super(FumoUtils.CATEGORY, "ignore", "Ignore users in chat, client side. Use '.ignore' to add users");
     }
 
-    @EventHandler
+    @EventHandler(priority = 1)
     private void onMessageReceive(ReceiveMessageEvent event) {
         Component message = event.getMessage();
 

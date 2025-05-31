@@ -9,6 +9,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import moe.kyuunex.fumo_utils.modules.IgnoreUsers;
 import net.minecraft.commands.SharedSuggestionProvider;
 
+import java.util.List;
+
 public class Ignore extends Command {
     public Ignore() {
         super("ignore", "Ignores the user");
@@ -23,9 +25,16 @@ public class Ignore extends Command {
         GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
 
         IgnoreUsers ignoreModule = Modules.get().get(IgnoreUsers.class);
-        ignoreModule.ignoredUsers.get().add(profile.getName());
+        List<String> ignoredUsers = ignoreModule.ignoredUsers.get();
 
-        info("%s ignored client side.", profile.getName());
+        if (ignoredUsers.contains(profile.getName())) {
+            ignoredUsers.remove(profile.getName());
+            info("%s unignored client side.", profile.getName());
+        } else {
+            ignoredUsers.add(profile.getName());
+            info("%s ignored client side.", profile.getName());
+        }
+
         return SINGLE_SUCCESS;
     }
 }
