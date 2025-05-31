@@ -8,6 +8,7 @@ Public edition of FumoUtils.
 
 ### Available modules:
 - AltitudeStabilizer
+- AreaHighlighter
 - AutoDump
 - ChatNotifier
 - DCNotify
@@ -20,9 +21,7 @@ Public edition of FumoUtils.
 - IgnoreUsers
 - ItemESP
 - Karaoke
-- MapHighlighter
 - QuartzFarmer
-- RegionFileHighlighter
 - SleepAura
 - TPSLogger
 - TridentDupe
