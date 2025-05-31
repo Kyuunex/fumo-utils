@@ -10,6 +10,7 @@ to enhance your anarchy Minecraft experience.
 ### Available modules:
 - AltitudeStabilizer
 - AreaHighlighter
+- AutoDropJunk
 - AutoDump
 - ChatNotifier
 - DCNotify
