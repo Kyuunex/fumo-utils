@@ -54,7 +54,7 @@ public class AltitudeStabilizer extends Module {
         .name("take-off-pitch")
         .description("Pitch to set when taking off")
         .defaultValue(-6.5)
-        .range(-10, 0)
+        .range(-360, 360)
         .sliderRange(-10, 0)
         .build()
     );
@@ -64,7 +64,7 @@ public class AltitudeStabilizer extends Module {
         .name("normal-pitch")
         .description("Pitch to use normally while flying")
         .defaultValue(-3.5)
-        .range(-10, 0)
+        .range(-360, 360)
         .sliderRange(-10, 0)
         .build()
     );
@@ -73,7 +73,7 @@ public class AltitudeStabilizer extends Module {
         .name("correction-pitch")
         .description("Pitch to use to stabilize the Y level")
         .defaultValue(-4.6)
-        .range(-10, 0)
+        .range(-360, 360)
         .sliderRange(-10, 0)
         .build()
     );
@@ -90,7 +90,7 @@ public class AltitudeStabilizer extends Module {
         .name("dramatic-pitch-delta")
         .description("By how much to dramatically change the pitch")
         .defaultValue(0.5)
-        .range(0, 10)
+        .range(-360, 360)
         .sliderRange(0, 10)
         .build()
     );
@@ -98,7 +98,7 @@ public class AltitudeStabilizer extends Module {
         .name("subtle-pitch-delta")
         .description("By how much to subtly change the pitch")
         .defaultValue(0.15)
-        .range(0, 1)
+        .range(-360, 360)
         .sliderRange(0, 1)
         .build()
     );
