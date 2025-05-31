@@ -22,6 +22,7 @@ public class FumoUtils extends MeteorAddon {
         // Modules
         Modules.get().add(new AltitudeStabilizer());
         Modules.get().add(new AreaHighlighter());
+        Modules.get().add(new AutoDropJunk());
         Modules.get().add(new AutoDump());
         Modules.get().add(new ChatNotifier());
         Modules.get().add(new DCNotify());
