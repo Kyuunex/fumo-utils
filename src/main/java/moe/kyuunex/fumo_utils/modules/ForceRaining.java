@@ -10,7 +10,7 @@ import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 public class ForceRaining extends Module {
 
     public ForceRaining() {
-        super(FumoUtils.CATEGORY, "force-raining", "Force raining client-side. OW only");
+        super(FumoUtils.CATEGORY, "force-raining", "Force raining client-side. OW only.");
     }
 
     @EventHandler
