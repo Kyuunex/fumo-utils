@@ -1,25 +1,30 @@
 package moe.kyuunex.fumo_utils.models;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LyricsFile {
     Pattern pattern = Pattern.compile("^\\[(\\d{2}):(\\d{2}\\.\\d{2})\\]\\s*(.*)$");
-    public int lastLyric;
+    private int lastLyric;
 
-    public Dictionary<Integer, String> lyrics = new Hashtable<>();
+    private final Map<Integer, String> lyrics = new HashMap<>(64);
 
-    public LyricsFile(Scanner object){
-        while (object.hasNextLine()) {
-            String data = object.nextLine();
+    public LyricsFile(File file) throws FileNotFoundException {
+        Scanner scanner = new Scanner(file);
+
+        while (scanner.hasNextLine()) {
+            String data = scanner.nextLine();
             ParseLine(data);
         }
+        scanner.close();
     }
 
-    void ParseLine(String line){
+    private void ParseLine(String line){
         Matcher matcher = pattern.matcher(line);
 
         if (matcher.matches()) {
@@ -27,12 +32,18 @@ public class LyricsFile {
             double seconds = Double.parseDouble(matcher.group(2));
             String lyric = matcher.group(3).trim();
 
-            // Calculate the total timestamp in seconds
             double timestamp = (minutes * 60 + seconds) * 20;
 
-            // Add the parsed lyric to the list=
             lyrics.put((int)timestamp, lyric);
             lastLyric = (int)timestamp;
         }
+    }
+
+    public String getAtTick(int tick){
+        return lyrics.get(tick);
+    }
+
+    public int getMaxDuration(){
+        return lastLyric;
     }
 }

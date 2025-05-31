@@ -10,40 +10,38 @@ import moe.kyuunex.fumo_utils.models.LyricsFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
 
 
 public class Karaoke extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
     private int duration = 0;
     private boolean isReady = false;
-    private Scanner scanner;
     private LyricsFile lyricsFile;
 
     private final Setting<String> lyricsFilePath = sgGeneral.add(new StringSetting.Builder()
         .name("lyrics-file-path")
-        .description("Full path to the lyrics file")
+        .description("Full path to the .lrc file")
         .defaultValue("")
-        .build()
-    );
-
-    private final Setting<Boolean> isUntimed = sgGeneral.add(new BoolSetting.Builder()
-        .name("is-untimed-file")
-        .description("Enable for a text file with lyrics each line, with no timestamping. Disable for .lrc")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Integer> timeBetweenLines = sgGeneral.add(new IntSetting.Builder()
-        .name("time-between-lines")
-        .description("Time between lines (in ticks) (for untimed only!)")
-        .defaultValue(74)
         .build()
     );
 
     private final Setting<Boolean> simulate = sgGeneral.add(new BoolSetting.Builder()
         .name("simulate")
         .description("Enable to send client side only for preview, disable to send messages to the server")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<TextColor> textColor = sgGeneral.add(new EnumSetting.Builder<TextColor>()
+        .name("text-color")
+        .description("Green text? or Blue text? or none?")
+        .defaultValue(TextColor.Default)
+        .build()
+    );
+
+    public final Setting<Boolean> convertToCaps = sgGeneral.add(new BoolSetting.Builder()
+        .name("caps")
+        .description("Convert the string to caps")
         .defaultValue(false)
         .build()
     );
@@ -55,19 +53,18 @@ public class Karaoke extends Module {
     @Override
     public void onActivate() {
         try {
-            scanner = new Scanner(new File(lyricsFilePath.get()));
-            if(!isUntimed.get()) lyricsFile = new LyricsFile(scanner);
+            lyricsFile = new LyricsFile(new File(lyricsFilePath.get()));
             isReady = true;
             info("Karaoke started!");
         } catch (FileNotFoundException e) {
-            toggle();
+            info("File not found! Disabling!");
             isReady = false;
+            toggle();
         }
     }
 
     @Override
     public void onDeactivate() {
-        scanner.close();
         isReady = false;
         duration = 0;
     }
@@ -76,31 +73,36 @@ public class Karaoke extends Module {
     private void onTick(TickEvent.Post event) {
         if(!isReady) return;
 
-        if(isUntimed.get()) {
-            if(duration < timeBetweenLines.get()) {
-                duration += 1;
-                return;
-            }
-            duration = 0;
-            if(scanner.hasNextLine()) send(scanner.nextLine());
-        } else {
-            if(duration > lyricsFile.lastLyric) {
-                toggle();
-                return;
-            }
-            try {
-                String lyric = lyricsFile.lyrics.get(duration);
-                if(lyric != null) send(lyric);
-            }
-            catch (IndexOutOfBoundsException ignored){}
-            duration += 1;
+        if(duration > lyricsFile.getMaxDuration()) {
+            toggle();
+            return;
         }
+        String lyric = lyricsFile.getAtTick(duration);
+        if(lyric != null) send(lyric);
+        duration += 1;
     }
 
     private void send(String text){
-        if(simulate.get())
-            info(text);
+        if (convertToCaps.get())
+            text = text.toUpperCase();
+        if (simulate.get())
+            info(decorate(text));
         else
-            ChatUtils.sendPlayerMsg(text);
+            ChatUtils.sendPlayerMsg(decorate(text));
+    }
+
+    private String decorate(String text){
+        if (textColor.get() == TextColor.Green )
+            return "> %s".formatted(text);
+        else if (textColor.get() == TextColor.Blue)
+            return "`%s".formatted(text);
+        else
+            return text;
+    }
+
+    private enum TextColor {
+        Default,
+        Green,
+        Blue
     }
 }
