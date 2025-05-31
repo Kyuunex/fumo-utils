@@ -1,5 +1,6 @@
-# FumoUtils (Public)
-Public edition of FumoUtils.
+# FumoUtils (Public edition)
+FumoUtils is a Meteor Client Addon that provides some additional modules and commands 
+to enhance your anarchy Minecraft experience.
 
 ### Requirements
 - Minecraft 1.21.1
