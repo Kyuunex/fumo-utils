@@ -9,6 +9,7 @@ to enhance your anarchy Minecraft experience.
 
 ### Available modules:
 - AltitudeStabilizer
+- AreaHighlighter
 - AutoDump
 - ChatNotifier
 - DCNotify
@@ -20,9 +21,7 @@ to enhance your anarchy Minecraft experience.
 - IgnoreUsers
 - ItemESP
 - Karaoke
-- MapHighlighter
 - QuartzFarmer
-- RegionFileHighlighter
 - SleepAura
 - TPSLogger
 - TridentDupe
