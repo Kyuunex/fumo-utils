@@ -1,6 +1,7 @@
 package moe.kyuunex.fumo_utils.commands;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import meteordevelopment.meteorclient.commands.Command;
@@ -18,21 +19,31 @@ public class Ignore extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<SharedSuggestionProvider> builder) {
-        builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(this::ignore));
+        builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(this::ignoreProfile));
+        builder.then(argument("username", StringArgumentType.word()).executes(this::ignoreString));
     }
 
-    private int ignore(CommandContext<SharedSuggestionProvider> context) {
+    private int ignoreProfile(CommandContext<SharedSuggestionProvider> context) {
         GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
+        String username = profile.getName();
+        return ignore(username);
+    }
 
+    private int ignoreString(CommandContext<SharedSuggestionProvider> context) {
+        String username = StringArgumentType.getString(context, "username");
+        return ignore(username);
+    }
+
+    private int ignore(String username) {
         IgnoreUsers ignoreModule = Modules.get().get(IgnoreUsers.class);
         List<String> ignoredUsers = ignoreModule.ignoredUsers.get();
 
-        if (ignoredUsers.contains(profile.getName())) {
-            ignoredUsers.remove(profile.getName());
-            info("%s unignored client side.", profile.getName());
+        if (ignoredUsers.contains(username)) {
+            ignoredUsers.remove(username);
+            info("%s unignored client side.", username);
         } else {
-            ignoredUsers.add(profile.getName());
-            info("%s ignored client side.", profile.getName());
+            ignoredUsers.add(username);
+            info("%s ignored client side.", username);
         }
 
         return SINGLE_SUCCESS;
