@@ -14,13 +14,10 @@ import java.io.FileNotFoundException;
 
 public class Karaoke extends Module {
     private final SettingGroup sgGeneral = this.settings.getDefaultGroup();
-    private int duration = 0;
-    private boolean isReady = false;
-    private LyricsFile lyricsFile;
 
     private final Setting<String> lyricsFilePath = sgGeneral.add(new StringSetting.Builder()
         .name("lyrics-file-path")
-        .description("Full path to the .lrc file")
+        .description("Full path to the .lrc file. Use `syrics` from pypi to get the spotify lyrics.")
         .defaultValue("")
         .build()
     );
@@ -50,6 +47,10 @@ public class Karaoke extends Module {
         super(FumoUtils.CATEGORY, "karaoke", "Sing along with your friends on the server.");
     }
 
+    private int duration = 0;
+    private boolean isReady = false;
+    private LyricsFile lyricsFile;
+
     @Override
     public void onActivate() {
         try {
@@ -71,14 +72,14 @@ public class Karaoke extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if(!isReady) return;
+        if (!isReady) return;
 
-        if(duration > lyricsFile.getMaxDuration()) {
+        if (duration > lyricsFile.getMaxDuration()) {
             toggle();
             return;
         }
         String lyric = lyricsFile.getAtTick(duration);
-        if(lyric != null) send(lyric);
+        if (lyric != null) send(lyric);
         duration += 1;
     }
 
@@ -92,7 +93,7 @@ public class Karaoke extends Module {
     }
 
     private String decorate(String text){
-        if (textColor.get() == TextColor.Green )
+        if (textColor.get() == TextColor.Green)
             return "> %s".formatted(text);
         else if (textColor.get() == TextColor.Blue)
             return "`%s".formatted(text);
