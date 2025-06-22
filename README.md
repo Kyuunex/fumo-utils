@@ -16,6 +16,7 @@ to enhance your anarchy Minecraft experience.
 - DCNotify
 - ElytraWatch
 - ForceRaining
+- FumoFly
 - FumoVoidESP
 - Geofence
 - HighwayHighlighter
