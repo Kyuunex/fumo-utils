@@ -17,6 +17,7 @@ to enhance your anarchy Minecraft experience.
 - DoujinDupe
 - ElytraWatch
 - ForceRaining
+- FumoFly
 - FumoVoidESP
 - Geofence
 - HighwayHighlighter
