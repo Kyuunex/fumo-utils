@@ -77,7 +77,7 @@ public class SleepAura extends Module {
             }
             if (mc.level.dayTime() % 24000 != attemptTime) return;
         } else {
-            if (!mc.level.isNight()) return;
+            if (!mc.level.isDarkOutside()) return;
         }
 
         if (bedPos == null) bedPos = findBed();

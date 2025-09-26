@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.Blocks;
@@ -118,7 +119,7 @@ public class QuartzFarmer extends Module {
         // Toggle if quartz amount reached
         if (selfToggle.get()) {
             if (mc.player == null) return;
-            ItemStack itemStack = mc.player.getInventory().armor.get(2);
+            ItemStack itemStack = mc.player.getItemBySlot(EquipmentSlot.CHEST);
 
             if (itemStack.getDamageValue() == 0) {
                 InvUtils.swapBack();

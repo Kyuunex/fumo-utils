@@ -7,6 +7,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.utils.DisconnectUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.sounds.SoundSource;
@@ -69,7 +70,7 @@ public class ElytraWatch extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
-        ItemStack chestStack = mc.player.getInventory().getArmor(2);
+        ItemStack chestStack = mc.player.getItemBySlot(EquipmentSlot.CHEST);
         boolean isWearingElytra = chestStack.getItem() == Items.ELYTRA;
         if (isWearingElytra && chestStack.getMaxDamage() - chestStack.getDamageValue() <= durabilityThreshold.get()){
             String alertMsg = "Elytra durability is bellow threshold; ";

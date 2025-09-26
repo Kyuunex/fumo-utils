@@ -50,14 +50,14 @@ public class TridentDupe extends Module {
         if (currentTick > interval.get()) currentTick = 0;
 
         if (currentTick == 1) {
-            if (!mc.player.getInventory().getSelected().is(Items.TRIDENT)) return;
+            if (!mc.player.getInventory().getSelectedItem().is(Items.TRIDENT)) return;
             mc.gameMode.useItem(mc.player, InteractionHand.MAIN_HAND);
             holdPacket = true;
         } else if (currentTick == interval.get()) {
             mc.gameMode.handleInventoryMouseClick(
                 mc.player.containerMenu.containerId,
                 3,
-                mc.player.getInventory().selected,
+                mc.player.getInventory().getSelectedSlot(),
                 ClickType.SWAP,
                 mc.player
             );
@@ -83,7 +83,7 @@ public class TridentDupe extends Module {
                 mc.gameMode.handleInventoryMouseClick(
                     mc.player.containerMenu.containerId,
                     3,
-                    mc.player.getInventory().selected,
+                    mc.player.getInventory().getSelectedSlot(),
                     ClickType.SWAP,
                     mc.player
                 );
