@@ -3,7 +3,7 @@ FumoUtils is a Meteor Client Addon that provides some additional modules and com
 to enhance your anarchy Minecraft experience.
 
 ### Requirements
-- Minecraft 1.21.4
+- Minecraft 1.21.8
 - Fabric loader
 - Meteor Client
 
@@ -20,6 +20,7 @@ to enhance your anarchy Minecraft experience.
 - FumoVoidESP
 - Geofence
 - HighwayHighlighter
+- HostOverride
 - IgnoreUsers
 - ItemESP
 - Karaoke
