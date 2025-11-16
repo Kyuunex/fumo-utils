@@ -20,6 +20,7 @@ to enhance your anarchy Minecraft experience.
 - FumoVoidESP
 - Geofence
 - HighwayHighlighter
+- HostOverride
 - IgnoreUsers
 - ItemESP
 - Karaoke
