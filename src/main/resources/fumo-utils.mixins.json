@@ -3,7 +3,8 @@
   "package": "moe.kyuunex.fumo_utils.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "ClientIntentionPacketMixin"
+    "ClientIntentionPacketMixin",
+    "meteorclient.BlockUtilsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
