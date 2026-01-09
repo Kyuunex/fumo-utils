@@ -10,6 +10,7 @@ import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundSetTimePacket;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BedBlock;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -61,7 +62,7 @@ public class SleepAura extends Module {
     private void onTick(TickEvent.Post event) {
         if (mc.level == null) return;
 
-        if (!mc.level.dimensionType().bedWorks()) {
+        if (mc.level.dimension() != Level.OVERWORLD) {
             error("Works only in The Overworld! Disabling");
             toggle();
             return;
@@ -75,7 +76,7 @@ public class SleepAura extends Module {
             } else {
                 attemptTime = scheduleTime.get();
             }
-            if (mc.level.dayTime() % 24000 != attemptTime) return;
+            if (mc.level.getDayTime() % 24000 != attemptTime) return;
         } else {
             if (!mc.level.isDarkOutside()) return;
         }
@@ -131,7 +132,7 @@ public class SleepAura extends Module {
         return String.format(
             "packet: %s, client: %s, target %s, rain %s",
             serverTime % 24000,
-            mc.level.dayTime() % 24000,
+            mc.level.getDayTime() % 24000,
             scheduleTime.get(),
             scheduleTimeRain.get()
         );

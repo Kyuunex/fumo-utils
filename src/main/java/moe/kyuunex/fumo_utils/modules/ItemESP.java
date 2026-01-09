@@ -214,7 +214,7 @@ public class ItemESP extends Module {
             count++;
         }
 
-        Renderer2D.COLOR.render(null);
+        // Renderer2D.COLOR.render(null);
     }
 
     private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {
@@ -240,7 +240,7 @@ public class ItemESP extends Module {
         if (entity.getType() != EntityType.ITEM) return true;
         if (!(entity instanceof ItemEntity itemEntity)) return true;
         if (!targetItems.get().contains(itemEntity.getItem().getItem())) return true;
-        if (entity == mc.cameraEntity && mc.options.getCameraType().isFirstPerson()) return true;
+        if (entity == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 

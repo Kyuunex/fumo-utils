@@ -25,7 +25,7 @@ public class Ignore extends Command {
 
     private int ignoreProfile(CommandContext<SharedSuggestionProvider> context) {
         GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
-        String username = profile.getName();
+        String username = profile.name();
         return ignore(username);
     }
 

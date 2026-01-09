@@ -5,6 +5,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -127,9 +128,9 @@ public class AltitudeStabilizer extends Module {
 
         Setting<Double> yLevel;
 
-        if (mc.player.clientLevel.dimensionType().respawnAnchorWorks()){
+        if (mc.level.dimension() == Level.NETHER){
             yLevel = yNether;
-        } else if (mc.player.clientLevel.dimensionType().bedWorks()){
+        } else if (mc.level.dimension() == Level.OVERWORLD){
             yLevel = yOverworld;
         } else {
             yLevel = yEnd;

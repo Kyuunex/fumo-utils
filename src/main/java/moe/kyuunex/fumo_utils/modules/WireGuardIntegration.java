@@ -79,7 +79,7 @@ public class WireGuardIntegration extends Module {
     public void onDeactivate() {
         destroyInstance();
     }
-    
+
     public void startInstance() {
         if (!Files.exists(Path.of(wireproxyExecutable.get()))) {
             FumoUtils.LOG.info("The wireproxy executable at: {} does not exist !!!! Baka Baka", wireproxyExecutable.get());
@@ -92,7 +92,7 @@ public class WireGuardIntegration extends Module {
         String wgConfigDirectory = wireguardConfigDirectory.get();
 
         GameProfile gameProfile = mc.getGameProfile();
-        String wgConfigPath = wgConfigDirectory.concat(gameProfile.getId().toString()).concat(".conf");
+        String wgConfigPath = wgConfigDirectory.concat(gameProfile.id().toString()).concat(".conf");
 
         if (!Files.exists(Path.of(wgConfigPath))) {
             FumoUtils.LOG.info("Account config file at: {} does not exist.", wgConfigPath);
@@ -118,7 +118,7 @@ public class WireGuardIntegration extends Module {
 
             wpProcess = new ProcessBuilder(wireproxyExecutable.get(), "-c", tmpConfigfile.toString()).start();
 
-            currentlyActiveAccount.set(gameProfile.getName());
+            currentlyActiveAccount.set(gameProfile.name());
 
             FumoUtils.LOG.info("WireGuard integration finished loading.");
         } catch (IOException ignored) {
