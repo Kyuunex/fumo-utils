@@ -24,6 +24,7 @@ to enhance your anarchy Minecraft experience.
 - IgnoreUsers
 - ItemESP
 - Karaoke
+- PearlLoader
 - QuartzFarmer
 - SleepAura
 - TPSLogger
@@ -32,6 +33,9 @@ to enhance your anarchy Minecraft experience.
 - UnSilkToucher
 - WebhookBridge
 - WireGuardIntegration
+
+### Mixins
+- BlockUtilsMixin - fixes Nuker on Constantiam, needed pre-1.21.10 Meteor.
 
 ### Available commands:
 - ChatCooker
