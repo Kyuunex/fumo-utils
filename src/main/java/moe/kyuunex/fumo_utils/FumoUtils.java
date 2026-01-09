@@ -37,6 +37,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new IgnoreUsers());
         Modules.get().add(new ItemESP());
         Modules.get().add(new Karaoke());
+        Modules.get().add(new PearlLoader());
         Modules.get().add(new QuartzFarmer());
         Modules.get().add(new SleepAura());
         Modules.get().add(new TPSLogger());
