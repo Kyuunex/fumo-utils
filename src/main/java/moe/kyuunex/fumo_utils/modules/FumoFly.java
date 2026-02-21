@@ -4,7 +4,6 @@ import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -158,11 +157,10 @@ public class FumoFly extends Module {
         }
 
         double yaw = mc.player.getYRot();
-        double x = (speed / 20d) * Math.cos(Math.toRadians(yaw + 90d));
-        double z = (speed / 20d) * Math.sin(Math.toRadians(yaw + 90d));
 
-        ((IVec3d) event.movement).meteor$setXZ(x, z);
+        event.movement.x = (speed / 20d) * Math.cos(Math.toRadians(yaw + 90d));
+        event.movement.z = (speed / 20d) * Math.sin(Math.toRadians(yaw + 90d));
 
-        mc.player.setDeltaMovement(event.movement.x(), event.movement.y(), event.movement.z());
+        mc.player.setDeltaMovement(event.movement);
     }
 }

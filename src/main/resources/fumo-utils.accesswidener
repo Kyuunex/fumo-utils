@@ -1,3 +1,7 @@
 accessWidener	v1	named
 
 accessible field net/minecraft/network/Connection channel Lio/netty/channel/Channel;
+
+mutable field net/minecraft/world/phys/Vec3 x D
+mutable field net/minecraft/world/phys/Vec3 y D
+mutable field net/minecraft/world/phys/Vec3 z D
