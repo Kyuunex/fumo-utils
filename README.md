@@ -1,6 +1,7 @@
 # FumoUtils (Public edition)
 FumoUtils is a Meteor Client Addon that provides some additional modules and commands 
-to enhance your anarchy Minecraft experience.
+to enhance your anarchy Minecraft experience. While there are older branches for testing purposes, 
+for regular use I only support one version of Minecraft/Meteor at a time, currently being 1.21.11.
 
 ### Requirements
 - Minecraft 1.21.11
@@ -19,7 +20,6 @@ to enhance your anarchy Minecraft experience.
 - FumoFly
 - FumoVoidESP
 - Geofence
-- HighwayHighlighter
 - HostOverride
 - IgnoreUsers
 - ItemESP
@@ -33,6 +33,12 @@ to enhance your anarchy Minecraft experience.
 - UnSilkToucher
 - WebhookBridge
 - WireGuardIntegration
+
+###### Highway tools:
+- HighwayAligner
+- HighwayHighlighter
+- HighwayPaver
+- HighwayTunneler
 
 ### Available commands:
 - ChatCooker
