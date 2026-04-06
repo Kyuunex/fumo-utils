@@ -2,6 +2,7 @@ package moe.kyuunex.fumo_utils;
 
 import moe.kyuunex.fumo_utils.commands.*;
 import moe.kyuunex.fumo_utils.modules.*;
+import moe.kyuunex.fumo_utils.modules.highwaytools.*;
 
 import meteordevelopment.meteorclient.addons.GithubRepo;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
@@ -32,7 +33,6 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new FumoFly());
         Modules.get().add(new FumoVoidESP());
         Modules.get().add(new Geofence());
-        Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new HostOverride());
         Modules.get().add(new IgnoreUsers());
         Modules.get().add(new ItemESP());
@@ -53,6 +53,12 @@ public class FumoUtils extends MeteorAddon {
         Commands.add(new OfflineUUIDGen());
         Commands.add(new PrintRemoteIP());
         Commands.add(new PrintTPS());
+
+        // Highway modules
+        Modules.get().add(new HighwayAligner());
+        Modules.get().add(new HighwayHighlighter());
+        Modules.get().add(new HighwayPaver());
+        Modules.get().add(new HighwayTunneler());
     }
 
     @Override

@@ -1,4 +1,4 @@
-package moe.kyuunex.fumo_utils.modules;
+package moe.kyuunex.fumo_utils.modules.highwaytools;
 
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -68,12 +68,21 @@ public class HighwayHighlighter extends Module {
         .build()
     );
 
-    private final Setting<Double> radius = sgRing.add(new DoubleSetting.Builder()
+    private final Setting<Integer> radius = sgRing.add(new IntSetting.Builder()
         .name("radius")
         .description("Radius of the ring")
         .defaultValue(5000)
         .range(0, worldBorder)
         .sliderRange(0, worldBorder)
+        .build()
+    );
+
+    private final Setting<Double> blockOffset = sgRing.add(new DoubleSetting.Builder()
+        .name("block-offset")
+        .description("Offset the line to center it to a block.")
+        .defaultValue(0.5)
+        .range(-0.5, 0.5)
+        .sliderRange(-0.5, 0.5)
         .build()
     );
 
@@ -108,16 +117,18 @@ public class HighwayHighlighter extends Module {
             yLevelToUse = yLevel.get();
         }
 
-        if(highwayType.get() == HighwayType.STRAIGHT) {
+        if (highwayType.get() == HighwayType.STRAIGHT) {
             event.renderer.line(
                 0, yLevelToUse, 0,
                 worldBorder*xMultiplier.get().getRaw(), yLevelToUse, worldBorder*yMultiplier.get().getRaw(),
                 lineColor.get()
             );
         } else {
+            double r = radius.get() + blockOffset.get();
+
             event.renderer.box(
-                radius.get(), yLevelToUse, radius.get(),
-                -radius.get(), yLevelToUse, -radius.get(),
+                -r, yLevelToUse, -r,   // min
+                r, yLevelToUse,  r,   // max
                 sideColor.get(), lineColor.get(), shapeMode.get(), 0
             );
         }

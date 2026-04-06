@@ -10,6 +10,10 @@ import net.minecraft.util.CommonColors;
 
 
 public class DisconnectUtils {
+    public static void disconnect(ClientPacketListener network, String reason) {
+        disconnect(network, Component.literal(reason));
+    }
+
     public static void disconnect(ClientPacketListener network, Component reason) {
         MutableComponent text = Component.empty();
         text.append(reason);

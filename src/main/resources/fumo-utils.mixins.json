@@ -3,12 +3,14 @@
   "package": "moe.kyuunex.fumo_utils.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "ClientIntentionPacketMixin"
+    "ClientIntentionPacketMixin",
+    "meteorclient.LiquidFillerMixin",
+    "meteorclient.MicrosoftAccountMixin",
+    "meteorclient.NukerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
   },
   "mixins": [
-    "meteorclient.MicrosoftAccountMixin"
   ]
 }
