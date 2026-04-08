@@ -1,5 +1,6 @@
 package moe.kyuunex.fumo_utils.modules.highwaytools;
 
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -15,6 +16,7 @@ import moe.kyuunex.fumo_utils.utils.DisconnectUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
@@ -35,6 +37,7 @@ public class HighwayPaver extends Module {
     private final SettingGroup sgDefault = settings.getDefaultGroup();
     private final SettingGroup sgInventorySettings = settings.createGroup("Inventory");
     private final SettingGroup sgSafeWalkSettings = settings.createGroup("Safe Walk");
+    private final SettingGroup sgExperimentalSettings = settings.createGroup("Experimental");
 
     private final Setting<Integer> interval = sgDefault.add(new IntSetting.Builder()
         .name("interval")
@@ -187,6 +190,13 @@ public class HighwayPaver extends Module {
         .build()
     );
 
+    private final Setting<Boolean> grimDesyncFix = sgExperimentalSettings.add(new BoolSetting.Builder()
+        .name("grim-desync-fix")
+        .description("Place a block in front of you, to force grim resync")
+        .defaultValue(false)
+        .build()
+    );
+
     private int timer = -1;
     private int sequence = 0;
     private final Map<BlockPos, Long> placedBlocks = new ConcurrentHashMap<>();
@@ -218,6 +228,25 @@ public class HighwayPaver extends Module {
             yLevel = forcedYLevel.get();
         } else {
             yLevel = mc.player.getBlockY() - 1;
+        }
+    }
+
+    @Override
+    public void onDeactivate() {
+        Timer timerMod = Modules.get().get(Timer.class);
+        if (timerMod == null) return;
+        timerMod.setOverride(1);
+    }
+
+    @EventHandler
+    public void onPacketSend(PacketEvent.Send event) {
+        if (mc.player == null) return;
+        if (!(event.packet instanceof ServerboundAcceptTeleportationPacket)) return;
+        info("Rubber banding detected?");
+
+        if (grimDesyncFix.get()) {
+            BlockPos currentBlockPos = mc.player.blockPosition();
+            placeBlock(currentBlockPos.relative(diggingDirection), false);
         }
     }
 
@@ -263,14 +292,14 @@ public class HighwayPaver extends Module {
         BlockPos currentBlockPos = mc.player.blockPosition();
 
         for (int i = 0; i <= howFarAhead.get(); i++) {
-            placeBlock(currentBlockPos.atY(yLevel).relative(diggingDirection, i));
+            placeBlock(currentBlockPos.atY(yLevel).relative(diggingDirection, i), packet.get());
             if (sideBlocksEnable.get()) {
                 placeBlock(currentBlockPos.relative(sideDirection.get())
                     .atY(yLevel)
-                    .relative(diggingDirection, i));
+                    .relative(diggingDirection, i), packet.get());
                 placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite())
                     .atY(yLevel)
-                    .relative(diggingDirection, i));
+                    .relative(diggingDirection, i), packet.get());
             }
         }
 
@@ -278,7 +307,7 @@ public class HighwayPaver extends Module {
         timer = 0;
     }
 
-    private boolean placeBlock(BlockPos pos) {
+    private boolean placeBlock(BlockPos pos, boolean packetPlace) {
         if (mc.gameMode == null || mc.player == null) return false;
 
         if (!isPlacable(pos)) return false;
@@ -300,7 +329,7 @@ public class HighwayPaver extends Module {
         boolean placed = false;
 
         // Place the block
-        if (packet.get()) {
+        if (packetPlace) {
             ClientPacketListener network = mc.getConnection();
             if (network == null) return false;
             network.getConnection().send(
