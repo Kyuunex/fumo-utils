@@ -58,7 +58,8 @@ public class HighwayPaver extends Module {
     private final Setting<Integer> forcedYLevel = sgDefault.add(new IntSetting.Builder()
         .name("y-level")
         .description("Y Level to place on.")
-        .sliderRange(-64, 320)
+        .sliderRange(62, 320)
+        .range(-64, 320)
         .defaultValue(118)
         .visible(forceYLevelEnable::get)
         .build()
@@ -81,14 +82,17 @@ public class HighwayPaver extends Module {
 
     private final Setting<Boolean> sideBlocksEnable = sgDefault.add(new BoolSetting.Builder()
         .name("place-blocks-on-side")
-        .description("")
+        .description("3 blocks wide instead of 1.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Direction> sideDirection = sgDefault.add(new EnumSetting.Builder<Direction>()
         .name("side-direction")
-        .description("side..")
+        .description("Which direction is your right or left. "
+            + "If you are walking North, you select East or West, "
+            + "and East and West in front of you is paved. "
+            + "In Corner Paving mode, only the selected direction is paved, 2 blocks.")
         .defaultValue(Direction.WEST)
         .visible(sideBlocksEnable::get)
         .build()
@@ -104,14 +108,14 @@ public class HighwayPaver extends Module {
 
     private final Setting<Boolean> packet = sgDefault.add(new BoolSetting.Builder()
         .name("packet-place")
-        .description("Packet place instead of normal place.")
+        .description("Packet place instead of normal place. Recommended so you don't fall off.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> airPlace = sgDefault.add(new BoolSetting.Builder()
         .name("air-place")
-        .description("Literally air place.")
+        .description("Literally air place. Doesn't work on 9b9t.")
         .defaultValue(false)
         .build()
     );
@@ -124,21 +128,21 @@ public class HighwayPaver extends Module {
 
     private final Setting<Boolean> offhand = sgInventorySettings.add(new BoolSetting.Builder()
         .name("offhand")
-        .description("Use the offhand slot instead of normal inventory slot for blocks.")
-        .defaultValue(false)
+        .description("Use the offhand for holding blocks. Highly recommended to avoid inventory desync.")
+        .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> offhandReplenish = sgInventorySettings.add(new BoolSetting.Builder()
         .name("offhand-replenish")
         .description("Replenish the offhand slot with blocks.")
-        .defaultValue(false)
+        .defaultValue(true)
         .visible(offhand::get)
         .build()
     );
 
-    private final Setting<Integer> replenishWhenBellow = sgInventorySettings.add(new IntSetting.Builder()
-        .name("replenish-when-bellow")
+    private final Setting<Integer> replenishWhenBelow = sgInventorySettings.add(new IntSetting.Builder()
+        .name("replenish-when-below")
         .description("")
         .sliderRange(0, 64)
         .defaultValue(32)
@@ -193,6 +197,13 @@ public class HighwayPaver extends Module {
     private final Setting<Boolean> grimDesyncFix = sgExperimentalSettings.add(new BoolSetting.Builder()
         .name("grim-desync-fix")
         .description("Place a block in front of you, to force grim resync")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> cornerPaveEnable = sgExperimentalSettings.add(new BoolSetting.Builder()
+        .name("corner-pave")
+        .description("Instead of paving 1 block in each direction, you are walking at the corner and paving 2 blocks in only one direction.")
         .defaultValue(false)
         .build()
     );
@@ -259,12 +270,29 @@ public class HighwayPaver extends Module {
 
         if (fumoSafeWalk.get()) {
             BlockPos currentBlockPos = mc.player.blockPosition();
-            if (!canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection))) {
-                Timer timerMod = Modules.get().get(Timer.class);
-                timerMod.setOverride(safeTimer.get());
+            boolean fwClear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection));
+            boolean sideClear;
+            boolean side2Clear;
+
+            if (sideBlocksEnable.get()){
+                sideClear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get()));
+
+                if (cornerPaveEnable.get()) {
+                    side2Clear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get()).relative(sideDirection.get()));
+                } else {
+                    side2Clear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get().getOpposite()));
+                }
             } else {
+                sideClear = true;
+                side2Clear = true;
+            }
+
+            if (fwClear && sideClear && side2Clear) {
                 Timer timerMod = Modules.get().get(Timer.class);
                 timerMod.setOverride(regularTimer.get());
+            } else {
+                Timer timerMod = Modules.get().get(Timer.class);
+                timerMod.setOverride(safeTimer.get());
             }
         }
 
@@ -273,7 +301,7 @@ public class HighwayPaver extends Module {
             return;
         }
 
-        if (offhand.get() && offhandReplenish.get() && mc.player.getOffhandItem().getCount() < replenishWhenBellow.get())
+        if (offhand.get() && offhandReplenish.get() && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get())
         {
             FindItemResult results = InvUtils.find(stack ->
                 whitelist.get().stream().anyMatch(block -> block.asItem() == stack.getItem()));
@@ -297,9 +325,15 @@ public class HighwayPaver extends Module {
                 placeBlock(currentBlockPos.relative(sideDirection.get())
                     .atY(yLevel)
                     .relative(diggingDirection, i), packet.get());
-                placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite())
-                    .atY(yLevel)
-                    .relative(diggingDirection, i), packet.get());
+                if (cornerPaveEnable.get()) {
+                    placeBlock(currentBlockPos.relative(sideDirection.get()).relative(sideDirection.get())
+                        .atY(yLevel)
+                        .relative(diggingDirection, i), packet.get());
+                } else {
+                    placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite())
+                        .atY(yLevel)
+                        .relative(diggingDirection, i), packet.get());
+                }
             }
         }
 
