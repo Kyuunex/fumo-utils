@@ -14,6 +14,15 @@ import moe.kyuunex.fumo_utils.FumoUtils;
 public class AutoDropJunk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Integer> cooldown = sgGeneral.add(new IntSetting.Builder()
+        .name("cooldown")
+        .description("Cooldown after scanning inventory.")
+        .range(0, 600)
+        .sliderRange(0, 200)
+        .defaultValue(20)
+        .build()
+    );
+
     private final Setting<List<Item>> autoDropItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("auto-drop-items")
         .description("Items to drop.")
@@ -45,9 +54,16 @@ public class AutoDropJunk extends Module {
         super(FumoUtils.CATEGORY, "auto-drop-junk", "Auto drop as a standalone module");
     }
 
+    int cooldownTimer = 0;
+
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         if (mc.screen instanceof AbstractContainerScreen<?> || autoDropItems.get().isEmpty()) return;
+
+        if (cooldownTimer < cooldown.get()) {
+            cooldownTimer++;
+            return;
+        }
 
         for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().getContainerSize(); i++) {
             ItemStack itemStack = mc.player.getInventory().getItem(i);
@@ -57,5 +73,7 @@ public class AutoDropJunk extends Module {
                     !(autoDropExcludeEquipped.get() && SlotUtils.isArmor(i))) InvUtils.drop().slot(i);
             }
         }
+
+        cooldownTimer = 0;
     }
 }
