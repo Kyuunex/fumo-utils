@@ -209,6 +209,14 @@ public class HighwayPaver extends Module {
         .build()
     );
 
+    private final Setting<Boolean> guardRailsEnable = sgExperimentalSettings.add(new BoolSetting.Builder()
+        .name("guard-rails")
+        .description("Won't work with corner pave mode!")
+        .defaultValue(false)
+        .visible(() -> !cornerPaveEnable.get())
+        .build()
+    );
+
     private int timer = -1;
     private int sequence = 0;
     private final Map<BlockPos, Long> placedBlocks = new ConcurrentHashMap<>();
@@ -274,6 +282,8 @@ public class HighwayPaver extends Module {
             boolean fwClear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection));
             boolean sideClear;
             boolean side2Clear;
+            boolean sideClearRail = true;
+            boolean side2ClearRail = true;
 
             if (sideBlocksEnable.get()){
                 sideClear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get()));
@@ -288,7 +298,12 @@ public class HighwayPaver extends Module {
                 side2Clear = true;
             }
 
-            if (fwClear && sideClear && side2Clear) {
+            if (guardRailsEnable.get()) {
+                sideClearRail = canWalkOn(currentBlockPos.atY(yLevel+1).relative(diggingDirection).relative(sideDirection.get(), 2));
+                side2ClearRail = canWalkOn(currentBlockPos.atY(yLevel+1).relative(diggingDirection).relative(sideDirection.get().getOpposite(), 2));
+            }
+
+            if (fwClear && sideClear && side2Clear && sideClearRail && side2ClearRail) {
                 Timer timerMod = Modules.get().get(Timer.class);
                 timerMod.setOverride(regularTimer.get());
             } else {
@@ -334,6 +349,15 @@ public class HighwayPaver extends Module {
                 } else {
                     placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite())
                         .atY(yLevel)
+                        .relative(diggingDirection, i), packet.get());
+                }
+
+                if (guardRailsEnable.get()) {
+                    placeBlock(currentBlockPos.relative(sideDirection.get(), 2)
+                        .atY(yLevel+1)
+                        .relative(diggingDirection, i), packet.get());
+                    placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite(), 2)
+                        .atY(yLevel+1)
                         .relative(diggingDirection, i), packet.get());
                 }
             }

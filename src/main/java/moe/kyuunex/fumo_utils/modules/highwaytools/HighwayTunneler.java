@@ -30,6 +30,13 @@ public class HighwayTunneler extends Module {
         .build()
     );
 
+    private final Setting<Boolean> mushroomsOnly = sgDefault.add(new BoolSetting.Builder()
+        .name("mushrooms-only")
+        .description("Only dig out the mushrooms")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> forceYLevelEnable = sgDefault.add(new BoolSetting.Builder()
         .name("forced-y-level")
         .description("Force Y level instead of guessing.")
@@ -58,6 +65,13 @@ public class HighwayTunneler extends Module {
         .description("In which direction are you digging?")
         .defaultValue(Direction.WEST)
         .visible(forcedDirectionEnable::get)
+        .build()
+    );
+
+    private final Setting<Direction> sideDirection = sgDefault.add(new EnumSetting.Builder<Direction>()
+        .name("side-direction")
+        .description("")
+        .defaultValue(Direction.WEST)
         .build()
     );
 
@@ -119,14 +133,22 @@ public class HighwayTunneler extends Module {
         for (int i = 1; i <= farAhead.get(); i++) {
             BlockPos forwardBlock = mc.player.blockPosition().atY(yLevel).relative(diggingDirection, i);
 
-            if (!glowstoneExistsAt(forwardBlock))
-                mine(forwardBlock, false);
+            if (!mushroomsOnly.get()) {
+                if (!glowstoneExistsAt(forwardBlock))
+                    mine(forwardBlock, false);
 
-            if (!glowstoneExistsAt(forwardBlock.above()))
-                mine(forwardBlock.above(), false);
+                if (!glowstoneExistsAt(forwardBlock.above()))
+                    mine(forwardBlock.above(), false);
+            }
 
             if (mushroomExistsAt(forwardBlock.below())) {
                 mine(forwardBlock.below(), false);
+            }
+            if (mushroomExistsAt(forwardBlock.below().relative(sideDirection.get()))) {
+                mine(forwardBlock.below().relative(sideDirection.get()), false);
+            }
+            if (mushroomExistsAt(forwardBlock.below().relative(sideDirection.get().getOpposite()))) {
+                mine(forwardBlock.below().relative(sideDirection.get().getOpposite()), false);
             }
         }
 

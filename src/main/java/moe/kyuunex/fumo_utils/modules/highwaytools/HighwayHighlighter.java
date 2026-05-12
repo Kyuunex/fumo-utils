@@ -18,7 +18,7 @@ public class HighwayHighlighter extends Module {
     private final SettingGroup sgStraight = settings.createGroup("Straight/Diagonal");
     private final SettingGroup sgRing = settings.createGroup("Ring");
     private final SettingGroup sgRender = settings.createGroup("Render");
-    private final int worldBorder = 30000000;
+    private final int WB = 30000000;
 
     // General
     private final Setting<HighwayType> highwayType = sgGeneral.add(new EnumSetting.Builder<HighwayType>()
@@ -72,8 +72,8 @@ public class HighwayHighlighter extends Module {
         .name("radius")
         .description("Radius of the ring")
         .defaultValue(5000)
-        .range(0, worldBorder)
-        .sliderRange(0, worldBorder)
+        .range(0, WB)
+        .sliderRange(0, WB)
         .build()
     );
 
@@ -119,18 +119,20 @@ public class HighwayHighlighter extends Module {
 
         if (highwayType.get() == HighwayType.STRAIGHT) {
             event.renderer.line(
-                0, yLevelToUse, 0,
-                worldBorder*xMultiplier.get().getRaw(), yLevelToUse, worldBorder*yMultiplier.get().getRaw(),
+                0 + blockOffset.get(), yLevelToUse, 0 + blockOffset.get(),
+                WB * xMultiplier.get().getRaw() + blockOffset.get(), yLevelToUse, WB * yMultiplier.get().getRaw() + blockOffset.get(),
                 lineColor.get()
             );
         } else {
-            double r = radius.get() + blockOffset.get();
-
             event.renderer.box(
-                -r, yLevelToUse, -r,   // min
-                r, yLevelToUse,  r,   // max
+                getBlockOffset(-radius.get()), yLevelToUse, getBlockOffset(-radius.get()),   // min
+                getBlockOffset(radius.get()), yLevelToUse,  getBlockOffset(radius.get()),   // max
                 sideColor.get(), lineColor.get(), shapeMode.get(), 0
             );
         }
+    }
+
+    private double getBlockOffset(int n) {
+        return n + 0.5;
     }
 }
