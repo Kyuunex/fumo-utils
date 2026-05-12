@@ -92,10 +92,10 @@ public class WireGuardIntegration extends Module {
         String wgConfigDirectory = wireguardConfigDirectory.get();
 
         GameProfile gameProfile = mc.getGameProfile();
-        String wgConfigPath = wgConfigDirectory.concat(gameProfile.id().toString()).concat(".conf");
+        String wgConfigPath = findConfigFile(wgConfigDirectory, gameProfile);
 
-        if (!Files.exists(Path.of(wgConfigPath))) {
-            FumoUtils.LOG.info("Account config file at: {} does not exist.", wgConfigPath);
+        if (wgConfigPath == null) {
+            FumoUtils.LOG.info("No config file for account: {}", gameProfile.name());
             return;
         }
 
@@ -107,7 +107,7 @@ public class WireGuardIntegration extends Module {
                 Files.deleteIfExists(tmpConfigfile.toPath());
             }
 
-            tmpConfigfile = File.createTempFile("mc-wg-", ".conf");
+            tmpConfigfile = File.createTempFile("mc-wg-" + gameProfile.name() + "-", ".conf");
             temporaryConfigFile.set(tmpConfigfile.getPath());
 
             FumoUtils.LOG.info("Temporary config file is at: {}", tmpConfigfile.toString());
@@ -146,5 +146,18 @@ public class WireGuardIntegration extends Module {
         temporaryConfigFile.reset();
         accountWireguardConfigFile.reset();
         FumoUtils.LOG.info("Deactivated WireGuard integration.");
+    }
+
+    private String findConfigFile(String wgConfigDirectory, GameProfile gameProfile) {
+        Path dir = Path.of(wgConfigDirectory);
+        for (String candidate : new String[]{gameProfile.id().toString(), gameProfile.name()}) {
+            Path path = dir.resolve(candidate + ".conf");
+            if (Files.exists(path)) {
+                return path.toString();
+            } else {
+                FumoUtils.LOG.info("Account config file at: {} does not exist.", path);
+            }
+        }
+        return null;
     }
 }
