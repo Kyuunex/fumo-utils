@@ -13,6 +13,7 @@ import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import moe.kyuunex.fumo_utils.utils.DisconnectUtils;
+import moe.kyuunex.fumo_utils.utils.InventoryUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -306,7 +307,8 @@ public class HighwayPaver extends Module {
             FindItemResult results = InvUtils.find(stack ->
                 whitelist.get().stream().anyMatch(block -> block.asItem() == stack.getItem()));
             if (results.found()) {
-                InvUtils.move().from(results.slot()).to(40);
+                // InvUtils.move().from(results.slot()).to(40);
+                InventoryUtils.swapToHotbar(results.slot(), 40);
             } else {
                 if (disconnectWhenCantReplenish.get()) {
                     ClientPacketListener network = mc.getConnection();
@@ -415,32 +417,18 @@ public class HighwayPaver extends Module {
         if (item.isOffhand()) return true;
 
         if (!item.isHotbar()) {
-            swapToHotbar(item.slot(), dedicatedSlot.get());
+            InventoryUtils.swapToHotbar(item.slot(), dedicatedSlot.get());
             delayTimer = 2; // Small delay after inventory operation
             return false;
         }
 
         if (mc.player.getInventory().getSelectedSlot() != item.slot()) {
-            swapSlot(item.slot());
+            InventoryUtils.swapSlot(item.slot());
             delayTimer = 1;
             return false;
         }
 
         return true;
-    }
-
-    public void swapToHotbar(int slot, int hot) {
-        if (mc.player == null || mc.gameMode == null) {
-            return;
-        }
-
-        mc.gameMode.handleInventoryMouseClick(mc.player.containerMenu.containerId, slot, hot, ClickType.SWAP, mc.player);
-    }
-
-    public void swapSlot(int i) {
-        assert mc.player != null;
-        mc.player.getInventory().setSelectedSlot(i);
-        mc.player.connection.send(new ServerboundSetCarriedItemPacket(i));
     }
 
     public BlockHitResult getSafeHitResult(BlockPos pos) {
