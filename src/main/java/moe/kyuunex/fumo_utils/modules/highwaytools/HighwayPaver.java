@@ -127,6 +127,13 @@ public class HighwayPaver extends Module {
         .build()
     );
 
+    public final Setting<Boolean> debugPrint = sgDefault.add(new BoolSetting.Builder()
+        .name("debug-print")
+        .description("Print debug messages")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> offhand = sgInventorySettings.add(new BoolSetting.Builder()
         .name("offhand")
         .description("Use the offhand for holding blocks. Highly recommended to avoid inventory desync.")
@@ -322,8 +329,14 @@ public class HighwayPaver extends Module {
             FindItemResult results = InvUtils.find(stack ->
                 whitelist.get().stream().anyMatch(block -> block.asItem() == stack.getItem()));
             if (results.found()) {
-                // InvUtils.move().from(results.slot()).to(40);
-                InventoryUtils.swapToHotbar(results.slot(), 40);
+                if (results.slot() > 35 || results.slot() < 9) {
+                    if (debugPrint.get()) info("Schrodinger's slot %s".formatted(results.slot()));
+                } else {
+                    // InvUtils.move().from(results.slot()).to(40);
+                    InventoryUtils.swapToHotbar(results.slot(), 40);
+                    if (debugPrint.get()) info("replenished from %s to %s".formatted(results.slot(), 40));
+                }
+                if (!(results.slot() > 35 || results.slot() < 9)) return ;
             } else {
                 if (disconnectWhenCantReplenish.get()) {
                     ClientPacketListener network = mc.getConnection();
