@@ -327,7 +327,7 @@ public class HighwayPaver extends Module {
         if (offhand.get() && offhandReplenish.get() && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get())
         {
             FindItemResult results = InvUtils.find(stack ->
-                whitelist.get().stream().anyMatch(block -> block.asItem() == stack.getItem()));
+                whitelist.get().stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
             if (results.found()) {
                 if (results.slot() > 35 || results.slot() < 9) {
                     if (debugPrint.get()) info("Schrodinger's slot %s".formatted(results.slot()));
