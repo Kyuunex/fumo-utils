@@ -231,7 +231,6 @@ public class HighwayPaver extends Module {
         .name("guard-rails")
         .description("Won't work with corner pave mode!")
         .defaultValue(false)
-        .visible(() -> !cornerPaveEnable.get())
         .build()
     );
 
@@ -317,8 +316,20 @@ public class HighwayPaver extends Module {
             }
 
             if (guardRailsEnable.get()) {
-                sideClearRail = canWalkOn(currentBlockPos.atY(yLevel+1).relative(diggingDirection).relative(sideDirection.get(), 2));
-                side2ClearRail = canWalkOn(currentBlockPos.atY(yLevel+1).relative(diggingDirection).relative(sideDirection.get().getOpposite(), 2));
+                if (cornerPaveEnable.get()) {
+                    sideClearRail = canWalkOn(
+                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get(), 3)
+                    );
+                    side2ClearRail = canWalkOn(
+                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get().getOpposite(), 1)
+                    );
+                } else {
+                    sideClearRail = canWalkOn(
+                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get(), 2));
+                    side2ClearRail = canWalkOn(
+                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get().getOpposite(), 2)
+                    );
+                }
             }
 
             if (fwClear && sideClear && side2Clear && sideClearRail && side2ClearRail) {
@@ -374,12 +385,21 @@ public class HighwayPaver extends Module {
                 }
 
                 if (guardRailsEnable.get()) {
-                    placeBlock(currentBlockPos.relative(sideDirection.get(), 2)
-                        .atY(yLevel+1)
-                        .relative(diggingDirection, i), packet.get());
-                    placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite(), 2)
-                        .atY(yLevel+1)
-                        .relative(diggingDirection, i), packet.get());
+                    if (cornerPaveEnable.get()) {
+                        placeBlock(currentBlockPos.relative(sideDirection.get(), 3)
+                            .atY(yLevel + 1)
+                            .relative(diggingDirection, i), packet.get());
+                        placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite(), 1)
+                            .atY(yLevel + 1)
+                            .relative(diggingDirection, i), packet.get());
+                    } else {
+                        placeBlock(currentBlockPos.relative(sideDirection.get(), 2)
+                            .atY(yLevel+1)
+                            .relative(diggingDirection, i), packet.get());
+                        placeBlock(currentBlockPos.relative(sideDirection.get().getOpposite(), 2)
+                            .atY(yLevel+1)
+                            .relative(diggingDirection, i), packet.get());
+                    }
                 }
             }
         }
