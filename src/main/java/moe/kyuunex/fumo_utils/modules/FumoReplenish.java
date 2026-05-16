@@ -93,11 +93,28 @@ public class FumoReplenish extends Module {
         .build()
     );
 
+    private final Setting<Integer> inventoryCooldownDef = sgDefault.add(new IntSetting.Builder()
+        .name("inventory-cooldown")
+        .description("Cooldown after restocking")
+        .range(0, 2147483647)
+        .sliderRange(0, 100)
+        .defaultValue(20)
+        .build()
+    );
+
+    public final Setting<Boolean> debugPrint = sgDefault.add(new BoolSetting.Builder()
+        .name("debug-print")
+        .description("Print debug messages")
+        .defaultValue(false)
+        .build()
+    );
+
     public FumoReplenish() {
         super(FumoUtils.CATEGORY, "fumo-replenish", "A very specialized replenish module");
     }
 
     int timer = 0;
+    private int inventoryCooldown = 0;
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -110,17 +127,21 @@ public class FumoReplenish extends Module {
         }
 
         if (replenishPickaxes.get()){
-            if (!usablePickaxeInHotbar()) {
+            if (!usablePickaxeInHotbar() && inventoryCooldown == 0) {
                 replenishPickaxe();
             }
         }
 
-        if (!foodExistsInHotbar())
+        if (!foodExistsInHotbar() && inventoryCooldown == 0)
         {
             replenishFood();
         }
 
         timer++;
+
+        if (inventoryCooldown > 0) {
+            inventoryCooldown--;
+        }
     }
 
     private boolean usablePickaxeInHotbar() {
@@ -146,6 +167,8 @@ public class FumoReplenish extends Module {
         if (pickaxeFoundInSlot != -1) {
             // InvUtils.move().from(pickaxeFoundInSlot).to(preferredPickaxeHotbarSlot.get());
             InventoryUtils.swapToHotbar(pickaxeFoundInSlot, preferredPickaxeHotbarSlot.get());
+            inventoryCooldown = inventoryCooldownDef.get();
+            if (debugPrint.get()) info("replenished from %s to %s".formatted(pickaxeFoundInSlot, preferredPickaxeHotbarSlot.get()));
             info("replenished pickaxe!");
         }
     }
@@ -196,7 +219,9 @@ public class FumoReplenish extends Module {
         if (foodFoundInSlot != -1) {
             // InvUtils.move().from(foodFoundInSlot).to(preferredFoodHotbarSlot.get());
             InventoryUtils.swapToHotbar(foodFoundInSlot, preferredFoodHotbarSlot.get());
+            inventoryCooldown = 4;
             info("replenished food!");
+            if (debugPrint.get()) info("replenished from %s to %s".formatted(foodFoundInSlot, preferredFoodHotbarSlot.get()));
         }
     }
 
