@@ -149,6 +149,15 @@ public class HighwayPaver extends Module {
         .build()
     );
 
+    private final Setting<Integer> inventoryCooldownDef = sgInventorySettings.add(new IntSetting.Builder()
+        .name("inventory-cooldown")
+        .description("Cooldown after restocking")
+        .range(0, 2147483647)
+        .sliderRange(0, 100)
+        .defaultValue(20)
+        .build()
+    );
+
     private final Setting<Integer> replenishWhenBelow = sgInventorySettings.add(new IntSetting.Builder()
         .name("replenish-when-below")
         .description("")
@@ -227,7 +236,7 @@ public class HighwayPaver extends Module {
     private int timer = -1;
     private int sequence = 0;
     private final Map<BlockPos, Long> placedBlocks = new ConcurrentHashMap<>();
-    private int delayTimer = 0;
+    private int inventoryCooldown = 0;
     private int yLevel = 118;
     private Direction diggingDirection = Direction.EAST;
 
@@ -324,25 +333,22 @@ public class HighwayPaver extends Module {
             return;
         }
 
-        if (offhand.get() && offhandReplenish.get() && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get())
+        if (offhand.get() && offhandReplenish.get() && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get() && inventoryCooldown == 0)
         {
-            FindItemResult results = InvUtils.find(stack ->
-                whitelist.get().stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
-            if (results.found()) {
-                if (results.slot() > 35 || results.slot() < 9) {
-                    if (debugPrint.get()) info("Schrodinger's slot %s".formatted(results.slot()));
-                } else {
-                    // InvUtils.move().from(results.slot()).to(40);
-                    InventoryUtils.swapToHotbar(results.slot(), 40);
-                    if (debugPrint.get()) info("replenished from %s to %s".formatted(results.slot(), 40));
-                }
-                if (!(results.slot() > 35 || results.slot() < 9)) return ;
+//            FindItemResult results = InvUtils.find(stack -> whitelist.get().stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
+            int result = findBlockInInv();
+            if (result != -1) {
+                // InvUtils.move().from(results.slot()).to(40);
+                InventoryUtils.swapToHotbar(slotAdjust(result), 40);
+                inventoryCooldown = inventoryCooldownDef.get();
+                if (debugPrint.get()) info("replenished from %s to %s, unadjusted %s".formatted(slotAdjust(result), 40, result));
             } else {
                 if (disconnectWhenCantReplenish.get()) {
                     ClientPacketListener network = mc.getConnection();
                     DisconnectUtils.disconnect(network, "cannot replenish blocks, none found in inventory!");
                 } else {
                     info("cannot replenish blocks, none found in inventory!");
+                    inventoryCooldown = inventoryCooldownDef.get();
                 }
             }
         }
@@ -378,6 +384,10 @@ public class HighwayPaver extends Module {
 
 
         timer = 0;
+
+        if (inventoryCooldown > 0) {
+            inventoryCooldown--;
+        }
     }
 
     private boolean placeBlock(BlockPos pos, boolean packetPlace) {
@@ -455,13 +465,13 @@ public class HighwayPaver extends Module {
 
         if (!item.isHotbar()) {
             InventoryUtils.swapToHotbar(item.slot(), dedicatedSlot.get());
-            delayTimer = 2; // Small delay after inventory operation
+            inventoryCooldown = inventoryCooldownDef.get();
             return false;
         }
 
         if (mc.player.getInventory().getSelectedSlot() != item.slot()) {
             InventoryUtils.swapSlot(item.slot());
-            delayTimer = 1;
+            inventoryCooldown = inventoryCooldownDef.get();
             return false;
         }
 
@@ -539,5 +549,35 @@ public class HighwayPaver extends Module {
 
     public double getHeight(BlockPos pos) {
         return mc.level.getBlockState(pos).getShape(mc.level, pos).max(Direction.Axis.Y);
+    }
+
+    private int slotAdjust(int slot) {
+        // I have no idea what Mojang was smoking to make this necessary
+
+        if (slot == -1) return -1;
+        if (slot < 9) {
+            return slot + 36;
+        }
+        return slot;
+    }
+
+    private int findBlockInInv() {
+        if (mc.player == null) return -1;
+
+        List<Item> items = new ArrayList<>();
+
+        for (Block block : whitelist.get()) {
+            items.add(block.asItem());
+        }
+
+        for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
+            ItemStack itemStack = mc.player.getInventory().getItem(i);
+
+            if (items.contains(itemStack.getItem()) && itemStack.getCount() >= replenishWhenBelow.get() ) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 }
