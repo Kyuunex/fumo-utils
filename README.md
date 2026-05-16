@@ -17,6 +17,7 @@ for regular use I only support one version of Minecraft/Meteor at a time, curren
 - ChatNotifier
 - DCNotify
 - ElytraWatch
+- EntityInfo
 - ForceRaining
 - FumoFly
 - FumoReplenish
