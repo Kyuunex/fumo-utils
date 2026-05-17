@@ -1,6 +1,7 @@
 package moe.kyuunex.fumo_utils.modules.highwaytools;
 
 import java.util.ArrayList;
+import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -105,7 +106,7 @@ public class HighwayPaver extends Module {
         .name("how-far-ahead")
         .description("How far ahead to place the blocks?")
         .sliderRange(0, 6)
-        .defaultValue(2)
+        .defaultValue(3)
         .build()
     );
 
@@ -193,6 +194,21 @@ public class HighwayPaver extends Module {
         .build()
     );
 
+    private final Setting<Boolean> sneakWhenSlowingDown = sgSafeWalkSettings.add(new BoolSetting.Builder()
+        .name("also-sneak")
+        .description("Try sneaking also while slowing down. Decreases chances of falling off.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> howFarAheadSafe = sgSafeWalkSettings.add(new IntSetting.Builder()
+        .name("how-far-ahead-safe")
+        .description("How far ahead to check for safe to walk blocks?")
+        .sliderRange(0, 6)
+        .defaultValue(2)
+        .build()
+    );
+
     private final Setting<Double> safeTimer = sgSafeWalkSettings.add(new DoubleSetting.Builder()
         .name("safe-timer")
         .description("Speed to slow down to.")
@@ -220,6 +236,20 @@ public class HighwayPaver extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noGrimDesyncFixWhenNoMove = sgExperimentalSettings.add(new BoolSetting.Builder()
+        .name("no-desync-fix-when-stopping")
+        .description("You can tell just how jank is needed to deal with grim")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> aggresiveSafeWalk = sgExperimentalSettings.add(new BoolSetting.Builder()
+        .name("aggresive-safe-walk")
+        .description("EXPERIMENTAL, DO NOT USE.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> cornerPaveEnable = sgExperimentalSettings.add(new BoolSetting.Builder()
         .name("corner-pave")
         .description("Instead of paving 1 block in each direction, you are walking at the corner and paving 2 blocks in only one direction.")
@@ -239,6 +269,7 @@ public class HighwayPaver extends Module {
     private final Map<BlockPos, Long> placedBlocks = new ConcurrentHashMap<>();
     private int inventoryCooldown = 0;
     private int yLevel = 118;
+    private boolean stopMovement = false;
     private Direction diggingDirection = Direction.EAST;
 
     private static final double MAGIC_PLACE_OFFSET = 0.0154;
@@ -282,6 +313,7 @@ public class HighwayPaver extends Module {
         info("Rubber banding detected?");
 
         if (grimDesyncFix.get()) {
+            if (stopMovement && noGrimDesyncFixWhenNoMove.get()) return;
             BlockPos currentBlockPos = mc.player.blockPosition();
             placeBlock(currentBlockPos.relative(diggingDirection), false);
         }
@@ -296,48 +328,78 @@ public class HighwayPaver extends Module {
 
         if (fumoSafeWalk.get()) {
             BlockPos currentBlockPos = mc.player.blockPosition();
-            boolean fwClear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection));
-            boolean sideClear;
-            boolean side2Clear;
-            boolean sideClearRail = true;
-            boolean side2ClearRail = true;
+            boolean allClear = true;
 
-            if (sideBlocksEnable.get()){
-                sideClear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get()));
+            for (int i = 0; i <= howFarAheadSafe.get(); i++) {
 
-                if (cornerPaveEnable.get()) {
-                    side2Clear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get()).relative(sideDirection.get()));
-                } else {
-                    side2Clear = canWalkOn(currentBlockPos.atY(yLevel).relative(diggingDirection).relative(sideDirection.get().getOpposite()));
+                BlockPos forwardPos =
+                    currentBlockPos.atY(yLevel).relative(diggingDirection, i);
+
+                boolean fwClear = canWalkOn(forwardPos);
+
+                boolean sideClear = true;
+                boolean side2Clear = true;
+
+                boolean sideClearRail = true;
+                boolean side2ClearRail = true;
+
+                if (sideBlocksEnable.get()) {
+                    sideClear = canWalkOn(
+                        forwardPos.relative(sideDirection.get())
+                    );
+                    if (cornerPaveEnable.get()) {
+                        side2Clear = canWalkOn(
+                            forwardPos.relative(sideDirection.get(), 2)
+                        );
+                    } else {
+                        side2Clear = canWalkOn(
+                            forwardPos.relative(sideDirection.get().getOpposite())
+                        );
+                    }
                 }
-            } else {
-                sideClear = true;
-                side2Clear = true;
+
+                if (guardRailsEnable.get()) {
+                    BlockPos railPos = currentBlockPos.atY(yLevel + 1).relative(diggingDirection, i);
+                    if (cornerPaveEnable.get()) {
+                        sideClearRail = canWalkOn(
+                            railPos.relative(sideDirection.get(), 3)
+                        );
+                        side2ClearRail = canWalkOn(
+                            railPos.relative(sideDirection.get().getOpposite(), 1)
+                        );
+                    } else {
+                        sideClearRail = canWalkOn(
+                            railPos.relative(sideDirection.get(), 2)
+                        );
+                        side2ClearRail = canWalkOn(
+                            railPos.relative(sideDirection.get().getOpposite(), 2)
+                        );
+                    }
+                }
+
+                // if ANY check fails, stop immediately
+                if (!(fwClear && sideClear && side2Clear && sideClearRail && side2ClearRail)) {
+                    allClear = false;
+                    break;
+                }
             }
 
-            if (guardRailsEnable.get()) {
-                if (cornerPaveEnable.get()) {
-                    sideClearRail = canWalkOn(
-                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get(), 3)
-                    );
-                    side2ClearRail = canWalkOn(
-                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get().getOpposite(), 1)
-                    );
-                } else {
-                    sideClearRail = canWalkOn(
-                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get(), 2));
-                    side2ClearRail = canWalkOn(
-                        currentBlockPos.atY(yLevel + 1).relative(diggingDirection).relative(sideDirection.get().getOpposite(), 2)
-                    );
-                }
-            }
-
-            if (fwClear && sideClear && side2Clear && sideClearRail && side2ClearRail) {
+            if (allClear) {
                 Timer timerMod = Modules.get().get(Timer.class);
                 timerMod.setOverride(regularTimer.get());
+                stopMovement = false;
+                if (sneakWhenSlowingDown.get()) {
+                    mc.options.keyShift.setDown(false);
+                }
             } else {
                 Timer timerMod = Modules.get().get(Timer.class);
                 timerMod.setOverride(safeTimer.get());
+                if (aggresiveSafeWalk.get()) {
+                    stopMovement = true;
+                }
+                if (sneakWhenSlowingDown.get()) {
+                    mc.options.keyShift.setDown(true);
+                }
             }
         }
 
@@ -354,6 +416,7 @@ public class HighwayPaver extends Module {
                 // InvUtils.move().from(results.slot()).to(40);
                 InventoryUtils.swapToHotbar(slotAdjust(result), 40);
                 inventoryCooldown = inventoryCooldownDef.get();
+                stopMovement = false;
                 if (debugPrint.get()) info("replenished from %s to %s, unadjusted %s".formatted(slotAdjust(result), 40, result));
             } else {
                 if (disconnectWhenCantReplenish.get()) {
@@ -362,6 +425,7 @@ public class HighwayPaver extends Module {
                 } else {
                     info("cannot replenish blocks, none found in inventory!");
                     inventoryCooldown = inventoryCooldownDef.get();
+                    stopMovement = true;
                 }
             }
         }
@@ -601,5 +665,14 @@ public class HighwayPaver extends Module {
         }
 
         return -1;
+    }
+
+    @EventHandler
+    private void onPlayerMove(PlayerMoveEvent event) {
+        if (stopMovement) {
+            event.movement.x = 0;
+            event.movement.y = 0;
+            event.movement.z = 0;
+        }
     }
 }
