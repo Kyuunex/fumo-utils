@@ -60,6 +60,15 @@ public class HighwayAligner extends Module {
         .build()
     );
 
+    private final Setting<Integer> blockOffset = sgGeneral.add(new IntSetting.Builder()
+        .name("block-offset")
+        .description("Offset the coordinate in each direction if you are digging from the corner.")
+        .defaultValue(0)
+        .range(-20, 20)
+        .sliderRange(-2, 2)
+        .build()
+    );
+
     public final Setting<Boolean> debugPrint = sgGeneral.add(new BoolSetting.Builder()
         .name("debug-print")
         .description("Print debug messages")
@@ -85,7 +94,7 @@ public class HighwayAligner extends Module {
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
         if (debugPrint.get()) info("%s".formatted(mc.player.blockPosition().get(currentAxis.get())));
-        if ((int)mc.player.position().y() != yLevel.get() || mc.player.blockPosition().get(currentAxis.get()) != horizontalCoord.get()) {
+        if ((int)mc.player.position().y() != yLevel.get() || mc.player.blockPosition().get(currentAxis.get()) != (horizontalCoord.get() + blockOffset.get())) {
 
             if (timer < leniency.get()) {
                 timer++;
