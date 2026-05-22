@@ -85,10 +85,10 @@ public class HighwayAligner extends Module {
 
     Timer timerMod = Modules.get().get(Timer.class);
     Nuker nukerMod = Modules.get().get(Nuker.class);
-    AutoWalk autoWalkMod = Modules.get().get(AutoWalk.class);
-    Rotation rotationMod = Modules.get().get(Rotation.class);
+    HighwayWalk highwayWalkMod = Modules.get().get(HighwayWalk.class);
     HighwayTunneler tunnelMinerMod = Modules.get().get(HighwayTunneler.class);
     private int timer = 0;
+    public static boolean misaligned = false;
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -108,9 +108,9 @@ public class HighwayAligner extends Module {
 
             if (timerMod.isActive()) timerMod.toggle();
             if (nukerMod.isActive()) nukerMod.toggle();
-            if (autoWalkMod.isActive()) autoWalkMod.toggle();
-            //if (rotationMod.isActive()) rotationMod.toggle();
+            if (highwayWalkMod != null && highwayWalkMod.isActive()) highwayWalkMod.toggle();
             if (tunnelMinerMod != null && tunnelMinerMod.isActive()) tunnelMinerMod.toggle();
+            misaligned = true;
 
             ClientPacketListener network = mc.getConnection();
             timer = 0;
@@ -119,6 +119,7 @@ public class HighwayAligner extends Module {
             }
         } else {
             timer = 0;
+            misaligned = false;
         }
     }
 }

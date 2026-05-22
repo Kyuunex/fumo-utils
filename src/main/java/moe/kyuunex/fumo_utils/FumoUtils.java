@@ -61,7 +61,9 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new HighwayAligner());
         Modules.get().add(new HighwayHighlighter());
         Modules.get().add(new HighwayPaver());
+        Modules.get().add(new HighwaySponge());
         Modules.get().add(new HighwayTunneler());
+        Modules.get().add(new HighwayWalk());
     }
 
     @Override

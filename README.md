@@ -41,7 +41,9 @@ for regular use I only support one version of Minecraft/Meteor at a time, curren
 - HighwayAligner
 - HighwayHighlighter
 - HighwayPaver
+- HighwaySponge
 - HighwayTunneler
+- HighwayWalk
 
 ### Available commands:
 - ChatCooker
