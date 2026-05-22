@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Inventory;
-import moe.kyuunex.fumo_utils.utils.InventoryUtils;
+import moe.kyuunex.fumo_utils.utils.ported.InventoryUtils;
 
 
 import java.util.List;

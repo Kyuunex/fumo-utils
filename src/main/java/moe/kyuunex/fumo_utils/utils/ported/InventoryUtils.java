@@ -1,4 +1,4 @@
-package moe.kyuunex.fumo_utils.utils;
+package moe.kyuunex.fumo_utils.utils.ported;
 
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;

@@ -15,7 +15,7 @@ import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import moe.kyuunex.fumo_utils.utils.DisconnectUtils;
-import moe.kyuunex.fumo_utils.utils.InventoryUtils;
+import moe.kyuunex.fumo_utils.utils.ported.InventoryUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
