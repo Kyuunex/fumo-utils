@@ -53,28 +53,6 @@ public class HighwayTunneler extends Module {
         .build()
     );
 
-    private final Setting<Boolean> forcedDirectionEnable = sgDefault.add(new BoolSetting.Builder()
-        .name("forced-direction")
-        .description("Force digging direction instead of guessing.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Direction> forcedDirection = sgDefault.add(new EnumSetting.Builder<Direction>()
-        .name("digging-direction")
-        .description("In which direction are you digging?")
-        .defaultValue(Direction.WEST)
-        .visible(forcedDirectionEnable::get)
-        .build()
-    );
-
-    private final Setting<Direction> sideDirection = sgDefault.add(new EnumSetting.Builder<Direction>()
-        .name("side-direction")
-        .description("")
-        .defaultValue(Direction.WEST)
-        .build()
-    );
-
     private final Setting<Integer> farAhead = sgDefault.add(new IntSetting.Builder()
         .name("how-far-ahead")
         .description("")
@@ -93,7 +71,6 @@ public class HighwayTunneler extends Module {
     private int timer = -1;
     private int sequence = 0;
     private int yLevel = 118;
-    private Direction diggingDirection = Direction.EAST;
 
     public HighwayTunneler() {
         super(
@@ -107,12 +84,6 @@ public class HighwayTunneler extends Module {
     public void onActivate() {
         if (mc.player == null) return;
 
-        if (forcedDirectionEnable.get()) {
-            diggingDirection = forcedDirection.get();
-        } else {
-            diggingDirection = mc.player.getDirection();
-        }
-
         if (forceYLevelEnable.get()) {
             yLevel = forcedYLevel.get();
         } else {
@@ -122,6 +93,7 @@ public class HighwayTunneler extends Module {
 
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
+        if (mc.player == null) return;
         if (Modules.get().get(AutoGap.class).isEating()) return;
         if (Modules.get().get(AutoEat.class).eating) return;
 
@@ -130,29 +102,50 @@ public class HighwayTunneler extends Module {
             return;
         }
 
+        BlockPos playerBlockPos = mc.player.blockPosition();
+
         for (int i = 1; i <= farAhead.get(); i++) {
-            BlockPos forwardBlock = mc.player.blockPosition().atY(yLevel).relative(diggingDirection, i);
+            BlockPos basePos = playerBlockPos.atY(yLevel).relative(HighwayPaver.diggingDirection, i);
 
             if (!mushroomsOnly.get()) {
-                if (!glowstoneExistsAt(forwardBlock))
-                    mine(forwardBlock, false);
+                if (!glowstoneExistsAt(basePos))
+                    mine(basePos, false);
 
-                if (!glowstoneExistsAt(forwardBlock.above()))
-                    mine(forwardBlock.above(), false);
+                if (!glowstoneExistsAt(basePos.above()))
+                    mine(basePos.above(), false);
             }
 
-            if (mushroomExistsAt(forwardBlock.below())) {
-                mine(forwardBlock.below(), false);
+            BlockPos pavePos = basePos.below();
+
+            mineMushroomIfExists(pavePos);
+            if (HighwayPaver.sidePavingEnabled) {
+                mineMushroomIfExists(pavePos.relative(HighwayPaver.sideDirection));
+                if (HighwayPaver.cornerPavingEnabled) {
+                    mineMushroomIfExists(pavePos.relative(HighwayPaver.sideDirection, 2));
+                } else {
+                    mineMushroomIfExists(pavePos.relative(HighwayPaver.sideDirection.getOpposite()));
+                }
+
+                if (HighwayPaver.guardRailsEnabled) {
+                    if (HighwayPaver.cornerPavingEnabled) {
+                        mineMushroomIfExists(pavePos.above().relative(HighwayPaver.sideDirection, 3));
+                        mineMushroomIfExists(pavePos.above().relative(HighwayPaver.sideDirection.getOpposite(), 1));
+                    } else {
+                        mineMushroomIfExists(pavePos.above().relative(HighwayPaver.sideDirection, 2));
+                        mineMushroomIfExists(pavePos.above().relative(HighwayPaver.sideDirection.getOpposite(), 2));
+                    }
+                }
             }
-            if (mushroomExistsAt(forwardBlock.below().relative(sideDirection.get()))) {
-                mine(forwardBlock.below().relative(sideDirection.get()), false);
-            }
-            if (mushroomExistsAt(forwardBlock.below().relative(sideDirection.get().getOpposite()))) {
-                mine(forwardBlock.below().relative(sideDirection.get().getOpposite()), false);
-            }
+
         }
 
         timer = 0;
+    }
+
+    private void mineMushroomIfExists(BlockPos pos) {
+        if (mushroomExistsAt(pos)) {
+            mine(pos, false);
+        }
     }
 
     private boolean mushroomExistsAt(BlockPos pos){
@@ -182,7 +175,7 @@ public class HighwayTunneler extends Module {
             ClientPacketListener network = mc.getConnection();
             if (network == null) return;
             network.getConnection().send(
-                new ServerboundPlayerActionPacket(START_DESTROY_BLOCK, blockPos, diggingDirection, sequence),
+                new ServerboundPlayerActionPacket(START_DESTROY_BLOCK, blockPos, HighwayPaver.diggingDirection, sequence),
                 null,
                 true
             );

@@ -270,39 +270,26 @@ public class HighwayPaver extends Module {
             }
         }
 
-        BlockPos currentBlockPos = mc.player.blockPosition();
+        BlockPos playerBlockPos = mc.player.blockPosition();
 
         for (int i = 0; i <= howFarAhead.get(); i++) {
-            placeBlock(currentBlockPos.atY(yLevel).relative(diggingDirection, i), packet.get());
+            BlockPos basePos = playerBlockPos.atY(yLevel).relative(diggingDirection, i);
+            placeBlock(basePos, packet.get());
             if (sidePavingEnabled) {
-                placeBlock(currentBlockPos.relative(sideDirection)
-                    .atY(yLevel)
-                    .relative(diggingDirection, i), packet.get());
+                placeBlock(basePos.relative(sideDirection), packet.get());
                 if (cornerPavingEnabled) {
-                    placeBlock(currentBlockPos.relative(sideDirection).relative(sideDirection)
-                        .atY(yLevel)
-                        .relative(diggingDirection, i), packet.get());
+                    placeBlock(basePos.relative(sideDirection, 2), packet.get());
                 } else {
-                    placeBlock(currentBlockPos.relative(sideDirection.getOpposite())
-                        .atY(yLevel)
-                        .relative(diggingDirection, i), packet.get());
+                    placeBlock(basePos.relative(sideDirection.getOpposite()), packet.get());
                 }
 
-                if (guardRailsEnableSetting.get()) {
+                if (guardRailsEnabled) {
                     if (cornerPavingEnabled) {
-                        placeBlock(currentBlockPos.relative(sideDirection, 3)
-                            .atY(yLevel + 1)
-                            .relative(diggingDirection, i), packet.get());
-                        placeBlock(currentBlockPos.relative(sideDirection.getOpposite(), 1)
-                            .atY(yLevel + 1)
-                            .relative(diggingDirection, i), packet.get());
+                        placeBlock(basePos.above().relative(sideDirection, 3), packet.get());
+                        placeBlock(basePos.above().relative(sideDirection.getOpposite(), 1), packet.get());
                     } else {
-                        placeBlock(currentBlockPos.relative(sideDirection, 2)
-                            .atY(yLevel+1)
-                            .relative(diggingDirection, i), packet.get());
-                        placeBlock(currentBlockPos.relative(sideDirection.getOpposite(), 2)
-                            .atY(yLevel+1)
-                            .relative(diggingDirection, i), packet.get());
+                        placeBlock(basePos.above().relative(sideDirection, 2), packet.get());
+                        placeBlock(basePos.above().relative(sideDirection.getOpposite(), 2), packet.get());
                     }
                 }
             }

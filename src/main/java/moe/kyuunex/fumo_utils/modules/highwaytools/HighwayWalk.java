@@ -30,6 +30,14 @@ public class HighwayWalk extends Module {
         .build()
     );
 
+    private final Setting<Integer> howFarAheadEnsure = sgGeneral.add(new IntSetting.Builder()
+        .name("how-far-ahead-ensure")
+        .description("Don't move until this far blocks are mined")
+        .sliderRange(0, 6)
+        .defaultValue(3)
+        .build()
+    );
+
     private final Setting<Integer> yLevel = sgGeneral.add(new IntSetting.Builder()
         .name("y-level")
         .description("")
@@ -268,13 +276,36 @@ public class HighwayWalk extends Module {
             BlockPos basePos = mc.player.blockPosition().atY(yLevel.get());
 
             boolean blocked = false;
-            for (int forward = 0; forward <= 2 && !blocked; forward++) {
+            for (int forward = 0; forward <= howFarAheadEnsure.get() && !blocked; forward++) {
                 int minY = (forward == 0) ? 2 : 0; // don't check where player already is
                 for (int up = minY; up <= 3; up++) {
                     BlockPos checkPos = basePos.relative(fwDir, forward).above(up);
                     if (!mc.level.getBlockState(checkPos).isAir()) {
                         blocked = true;
                         break;
+                    }
+                    if (HighwayPaver.sidePavingEnabled) {
+                        BlockPos checkPosSide = basePos.relative(fwDir, forward).above(up)
+                            .relative(HighwayPaver.sideDirection);
+                        if (!mc.level.getBlockState(checkPosSide).isAir()) {
+                            blocked = true;
+                            break;
+                        }
+                        if (HighwayPaver.cornerPavingEnabled) {
+                            BlockPos checkPosSide2 = basePos.relative(fwDir, forward).above(up)
+                                .relative(HighwayPaver.sideDirection, 2);
+                            if (!mc.level.getBlockState(checkPosSide2).isAir()) {
+                                blocked = true;
+                                break;
+                            }
+                        } else {
+                            BlockPos checkPosSide2 = basePos.relative(fwDir, forward).above(up)
+                                .relative(HighwayPaver.sideDirection.getOpposite());
+                            if (!mc.level.getBlockState(checkPosSide2).isAir()) {
+                                blocked = true;
+                                break;
+                            }
+                        }
                     }
                 }
             }
