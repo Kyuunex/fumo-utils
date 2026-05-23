@@ -125,7 +125,7 @@ public class HighwayWalk extends Module {
     }
 
     private int eatingTimePassed = 0;
-    private boolean keepMoving = false;
+    private boolean keepMoving = true;
 
 
     @Override
@@ -231,8 +231,8 @@ public class HighwayWalk extends Module {
                 }
                 if (noFwdWhenSlowingDown.get()) {
                     mc.options.keyUp.setDown(true);
-                    keepMoving = true;
                 }
+                keepMoving = true;
             } else {
                 if (timerWhenSlowingDown.get()) {
                     Timer timerMod = Modules.get().get(Timer.class);
@@ -252,6 +252,7 @@ public class HighwayWalk extends Module {
             if (eatingTimePassed > 1000 && eatingStuckFixEnable.get()) {
                 info("eating for too long. attempting to reset eating.");
                 InventoryUtils.swapSlot(0);
+                eatingTimePassed = 0;
             }
             if (Modules.get().get(AutoGap.class).isEating() || Modules.get().get(AutoEat.class).eating) {
                 mc.options.keyUp.setDown(false);
