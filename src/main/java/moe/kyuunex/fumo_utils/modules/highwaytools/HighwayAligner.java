@@ -4,12 +4,10 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.Rotation;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.Nuker;
-import meteordevelopment.meteorclient.systems.modules.movement.AutoWalk;
 import moe.kyuunex.fumo_utils.utils.DisconnectUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.Direction;
@@ -77,7 +75,7 @@ public class HighwayAligner extends Module {
 
     public HighwayAligner() {
         super(
-            FumoUtils.CATEGORY,
+            FumoUtils.HIGHWAY,
             "highway-aligner",
             "Disconnects you when you get misaligned on the highway."
         );

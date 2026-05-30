@@ -194,7 +194,7 @@ public class HighwayPaver extends Module {
 
     public HighwayPaver() {
         super(
-            FumoUtils.CATEGORY,
+            FumoUtils.HIGHWAY,
             "highway-paver",
             "Specialized scaffold module to pave a tunnel."
         );
@@ -221,6 +221,12 @@ public class HighwayPaver extends Module {
         sidePavingEnabled = sideBlocksEnableSetting.get();
         cornerPavingEnabled = cornerPaveEnableSetting.get();
         guardRailsEnabled = guardRailsEnableSetting.get();
+    }
+
+    @Override
+    public void onDeactivate() {
+        stopMovement = false;
+        inventoryCooldown = 0;
     }
 
     @EventHandler

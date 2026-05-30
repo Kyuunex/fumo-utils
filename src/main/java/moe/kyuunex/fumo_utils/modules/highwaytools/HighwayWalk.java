@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import moe.kyuunex.fumo_utils.utils.ported.InventoryUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -38,6 +37,14 @@ public class HighwayWalk extends Module {
         .build()
     );
 
+    private final Setting<Integer> howFarBehindEnsure = sgGeneral.add(new IntSetting.Builder()
+        .name("how-far-behined-ensure")
+        .description("Also ensure blocks are mined behind the player. 0 to disable.")
+        .sliderRange(-6, 0)
+        .defaultValue(0)
+        .build()
+    );
+
     private final Setting<Integer> yLevel = sgGeneral.add(new IntSetting.Builder()
         .name("y-level")
         .description("")
@@ -55,9 +62,18 @@ public class HighwayWalk extends Module {
     );
 
     private final Setting<Boolean> eatingStuckFixEnable = sgGeneral.add(new BoolSetting.Builder()
-        .name("fix-eating-getting-stuch")
+        .name("fix-eating-getting-stuck")
         .description("As it says.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> eatingStuckFixTime = sgGeneral.add(new IntSetting.Builder()
+        .name("fix-after-eating-for-x-ticks")
+        .description("How long to wait before attempting to unstuck eating.")
+        .sliderRange(0, 2000)
+        .defaultValue(500)
+        .visible(eatingStuckFixEnable::get)
         .build()
     );
 
@@ -129,7 +145,7 @@ public class HighwayWalk extends Module {
     );
 
     public HighwayWalk() {
-        super(FumoUtils.CATEGORY, "highway-walk", "Meteor's Auto Walk forked for highway building.");
+        super(FumoUtils.HIGHWAY, "highway-walk", "Meteor's Auto Walk forked for highway building.");
     }
 
     private int eatingTimePassed = 0;
@@ -257,9 +273,9 @@ public class HighwayWalk extends Module {
         }
 
         if (pauseWhenEating.get()) {
-            if (eatingTimePassed > 1000 && eatingStuckFixEnable.get()) {
+            if (eatingStuckFixEnable.get() && eatingTimePassed > eatingStuckFixTime.get()) {
                 info("eating for too long. attempting to reset eating.");
-                InventoryUtils.swapSlot(0);
+                mc.player.getInventory().setSelectedSlot(0);
                 eatingTimePassed = 0;
             }
             if (Modules.get().get(AutoGap.class).isEating() || Modules.get().get(AutoEat.class).eating) {
@@ -276,7 +292,7 @@ public class HighwayWalk extends Module {
             BlockPos basePos = mc.player.blockPosition().atY(yLevel.get());
 
             boolean blocked = false;
-            for (int forward = 0; forward <= howFarAheadEnsure.get() && !blocked; forward++) {
+            for (int forward = howFarBehindEnsure.get(); forward <= howFarAheadEnsure.get() && !blocked; forward++) {
                 int minY = (forward == 0) ? 2 : 0; // don't check where player already is
                 for (int up = minY; up <= 3; up++) {
                     BlockPos checkPos = basePos.relative(fwDir, forward).above(up);

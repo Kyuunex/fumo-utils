@@ -71,13 +71,6 @@ public class HighwaySponge extends Module {
         .build()
     );
 
-    public final Setting<Boolean> debugPrint = sgGeneral.add(new BoolSetting.Builder()
-        .name("debug-print")
-        .description("Print debug messages")
-        .defaultValue(false)
-        .build()
-    );
-
     // Whitelist and blacklist
 
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
@@ -110,7 +103,7 @@ public class HighwaySponge extends Module {
 
     public HighwaySponge() {
         super(
-            FumoUtils.CATEGORY,
+            FumoUtils.HIGHWAY,
             "highway-sponge",
             "Plug lava source with netherrack. Must be with offhand!"
         );

@@ -11,7 +11,6 @@ import moe.kyuunex.fumo_utils.FumoUtils;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -74,7 +73,7 @@ public class HighwayTunneler extends Module {
 
     public HighwayTunneler() {
         super(
-            FumoUtils.CATEGORY,
+            FumoUtils.HIGHWAY,
             "highway-tunneler",
             "Highway tunnel miner."
         );

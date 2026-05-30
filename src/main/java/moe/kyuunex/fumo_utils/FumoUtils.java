@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 public class FumoUtils extends MeteorAddon {
     public static final Logger LOG = LogUtils.getLogger();
     public static final Category CATEGORY = new Category("FumoUtils");
+    public static final Category HIGHWAY = new Category("Highway Tools");
 
     @Override
     public void onInitialize() {
@@ -69,6 +70,7 @@ public class FumoUtils extends MeteorAddon {
     @Override
     public void onRegisterCategories() {
         Modules.registerCategory(CATEGORY);
+        Modules.registerCategory(HIGHWAY);
     }
 
     @Override

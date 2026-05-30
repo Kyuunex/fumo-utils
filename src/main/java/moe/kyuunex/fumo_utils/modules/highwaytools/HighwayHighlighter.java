@@ -102,7 +102,7 @@ public class HighwayHighlighter extends Module {
     );
 
     public HighwayHighlighter() {
-        super(FumoUtils.CATEGORY, "highway-highlighter", "Highlights a selected highway");
+        super(FumoUtils.HIGHWAY, "highway-highlighter", "Highlights a selected highway");
     }
 
     @EventHandler
