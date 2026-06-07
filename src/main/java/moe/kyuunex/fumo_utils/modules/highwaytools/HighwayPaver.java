@@ -233,9 +233,9 @@ public class HighwayPaver extends Module {
     public void onPacketSend(PacketEvent.Send event) {
         if (mc.player == null) return;
         if (!(event.packet instanceof ServerboundAcceptTeleportationPacket)) return;
-        info("Rubber banding detected?");
 
         if (grimDesyncFix.get()) {
+            info("Rubber banding detected?");
             if (stopMovement && noGrimDesyncFixWhenNoMove.get()) return;
             BlockPos currentBlockPos = mc.player.blockPosition();
             placeBlock(currentBlockPos.relative(diggingDirection), false);

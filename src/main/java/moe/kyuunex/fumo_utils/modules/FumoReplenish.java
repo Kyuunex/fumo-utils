@@ -31,6 +31,14 @@ public class FumoReplenish extends Module {
         .build()
     );
 
+    private final Setting<Boolean> fortuneOnlyEnable = sgPickaxeSettings.add(new BoolSetting.Builder()
+        .name("fortune-only")
+        .description("")
+        .defaultValue(false)
+        .visible(replenishPickaxes::get)
+        .build()
+    );
+
     private final Setting<Integer> targetPickaxeDurability = sgDefault.add(new IntSetting.Builder()
         .name("durability")
         .description("Swap below this durability")
@@ -184,7 +192,9 @@ public class FumoReplenish extends Module {
                 int remaining = stack.getMaxDamage() - stack.getDamageValue();
                 if (remaining <= targetPickaxeDurability.get()) continue;
 
-                // Check Fortune enchantment (1.21+ official mappings)
+                if (!fortuneOnlyEnable.get()) {
+                    return i;
+                }
                 if (EnchantmentHelper.getItemEnchantmentLevel(
                     mc.player.level().registryAccess()
                         .lookupOrThrow(Registries.ENCHANTMENT)

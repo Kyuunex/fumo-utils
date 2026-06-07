@@ -1,6 +1,7 @@
 package moe.kyuunex.fumo_utils.modules.highwaytools;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
@@ -16,11 +17,13 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HighwayWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSafeWalkSettings = settings.createGroup("Safe Walk");
+    private final SettingGroup sgExperimentalSettings = settings.createGroup("Experimental");
 
     private final Setting<Boolean> waitForChunks = sgGeneral.add(new BoolSetting.Builder()
         .name("no-unloaded-chunks")
@@ -144,12 +147,29 @@ public class HighwayWalk extends Module {
         .build()
     );
 
+    private final Setting<Boolean> lagbackPauseEnable = sgExperimentalSettings.add(new BoolSetting.Builder()
+        .name("lagback-pause-enable")
+        .description("Pause moving temporarily when getting lagback.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> lagbackPauseDuration = sgExperimentalSettings.add(new IntSetting.Builder()
+        .name("lagback-pause-duration")
+        .description("Amount of ticks to pause when lagback.")
+        .sliderRange(0, 4000)
+        .defaultValue(80)
+        .visible(lagbackPauseEnable::get)
+        .build()
+    );
+
     public HighwayWalk() {
         super(FumoUtils.HIGHWAY, "highway-walk", "Meteor's Auto Walk forked for highway building.");
     }
 
     private int eatingTimePassed = 0;
     private boolean keepMoving = true;
+    private int walkingCooldown = 0;
 
 
     @Override
@@ -163,6 +183,7 @@ public class HighwayWalk extends Module {
             timerMod.setOverride(1);
         }
         eatingTimePassed = 0;
+        walkingCooldown = 0;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -183,6 +204,12 @@ public class HighwayWalk extends Module {
 
         if (HighwayPaver.stopMovement) {
             info("can't replenish, stopping movement...");
+            mc.options.keyUp.setDown(false);
+            return;
+        }
+
+        if (walkingCooldown > 0) {
+            walkingCooldown--;
             mc.options.keyUp.setDown(false);
             return;
         }
@@ -355,5 +382,16 @@ public class HighwayWalk extends Module {
         if (state.liquid()) return false;
         if (state.isSolid()) return true;
         return false;
+    }
+
+    @EventHandler
+    public void onPacketSend(PacketEvent.Send event) {
+        if (mc.player == null) return;
+        if (!(event.packet instanceof ServerboundAcceptTeleportationPacket)) return;
+
+        if (lagbackPauseEnable.get()) {
+            info("Rubber banding detected?");
+            walkingCooldown = lagbackPauseDuration.get();
+        }
     }
 }
