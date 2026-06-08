@@ -77,19 +77,23 @@ public class AutoSmith extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
-        if (!(mc.screen instanceof SmithingScreen smither)) return;
+        if (!(mc.screen instanceof SmithingScreen)) return;
 
         if (flushTimer < cooldownAmount.get()) {
             flushTimer++;
             return;
         }
 
+        cycle();
+
+        flushTimer = 0;
+    }
+
+    private void cycle() {
         if (ensureTemplate()) return;
         if (ensureIngot()) return;
         if (ensureItem()) return;
         if (upgradeItem()) return;
-
-        flushTimer = 0;
     }
 
     private boolean ensureTemplate() {
