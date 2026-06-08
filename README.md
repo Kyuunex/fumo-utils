@@ -14,6 +14,7 @@ for regular use I only support one version of Minecraft/Meteor at a time, curren
 - AutoDropJunk
 - AutoDump
 - AutoIgnore
+- AutoSmith
 - ChatNotifier
 - DCNotify
 - ElytraWatch

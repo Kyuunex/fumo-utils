@@ -27,6 +27,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new AutoDropJunk());
         Modules.get().add(new AutoDump());
         Modules.get().add(new AutoIgnore());
+        Modules.get().add(new AutoSmith());
         Modules.get().add(new ChatNotifier());
         Modules.get().add(new DCNotify());
         // Modules.get().add(new DoujinDupe());
