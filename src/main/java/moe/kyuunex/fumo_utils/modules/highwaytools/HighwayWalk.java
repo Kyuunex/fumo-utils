@@ -18,6 +18,7 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HighwayWalk extends Module {
@@ -76,6 +77,15 @@ public class HighwayWalk extends Module {
         .description("How long to wait before attempting to unstuck eating.")
         .sliderRange(0, 2000)
         .defaultValue(500)
+        .visible(eatingStuckFixEnable::get)
+        .build()
+    );
+
+    private final Setting<Integer> eatingStuckFixSlot = sgGeneral.add(new IntSetting.Builder()
+        .name("eating-resync-slot")
+        .description("Which slot to try to resync eating too.")
+        .sliderRange(0, 8)
+        .defaultValue(8)
         .visible(eatingStuckFixEnable::get)
         .build()
     );
@@ -190,6 +200,7 @@ public class HighwayWalk extends Module {
     private void onTick(TickEvent.Pre event) {
         if (mc.level == null) return;
         if (mc.player == null) return;
+        if (mc.getConnection() == null) return;
 
         if (mc.player.getBlockY() - yLevel.get() > 2) {
             toggle();
@@ -302,7 +313,12 @@ public class HighwayWalk extends Module {
         if (pauseWhenEating.get()) {
             if (eatingStuckFixEnable.get() && eatingTimePassed > eatingStuckFixTime.get()) {
                 info("eating for too long. attempting to reset eating.");
-                mc.player.getInventory().setSelectedSlot(0);
+                mc.player.getInventory().setSelectedSlot(eatingStuckFixSlot.get());
+                mc.getConnection().getConnection().send(
+                    new ServerboundSetCarriedItemPacket(eatingStuckFixSlot.get()),
+                    null,
+                    true
+                );
                 eatingTimePassed = 0;
             }
             if (Modules.get().get(AutoGap.class).isEating() || Modules.get().get(AutoEat.class).eating) {

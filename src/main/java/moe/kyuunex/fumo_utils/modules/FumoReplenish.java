@@ -39,12 +39,13 @@ public class FumoReplenish extends Module {
         .build()
     );
 
-    private final Setting<Integer> targetPickaxeDurability = sgDefault.add(new IntSetting.Builder()
+    private final Setting<Integer> targetPickaxeDurability = sgPickaxeSettings.add(new IntSetting.Builder()
         .name("durability")
         .description("Swap below this durability")
         .defaultValue(80)
         .sliderRange(1, Items.NETHERITE_PICKAXE.components().get(DataComponents.MAX_DAMAGE))
         .range(0, Items.NETHERITE_PICKAXE.components().get(DataComponents.MAX_DAMAGE))
+        .visible(replenishPickaxes::get)
         .build()
     );
 
@@ -54,6 +55,7 @@ public class FumoReplenish extends Module {
         .defaultValue(1)
         .range(0, 8)
         .sliderRange(0, 8)
+        .visible(replenishPickaxes::get)
         .build()
     );
 
@@ -72,6 +74,7 @@ public class FumoReplenish extends Module {
         .defaultValue(
             Items.ENCHANTED_GOLDEN_APPLE
         )
+        .visible(() -> Boolean.FALSE)
         .build()
     );
 
@@ -156,7 +159,7 @@ public class FumoReplenish extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack stack = mc.player.getInventory().getItem(i);
 
-            if (stack.is(Items.NETHERITE_PICKAXE)) {
+            if (stack.is(Items.NETHERITE_PICKAXE) || stack.is(Items.DIAMOND_PICKAXE)) {
                 int remaining = stack.getMaxDamage() - stack.getDamageValue();
                 if (remaining > targetPickaxeDurability.get()) {
                     return true;
@@ -187,7 +190,7 @@ public class FumoReplenish extends Module {
         for (int i = 0; i < Inventory.INVENTORY_SIZE; i++) {
             ItemStack stack = mc.player.getInventory().getItem(i);
 
-            if (stack.is(Items.NETHERITE_PICKAXE)) {
+            if (stack.is(Items.NETHERITE_PICKAXE) || stack.is(Items.DIAMOND_PICKAXE)) {
 
                 int remaining = stack.getMaxDamage() - stack.getDamageValue();
                 if (remaining <= targetPickaxeDurability.get()) continue;

@@ -24,6 +24,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -254,7 +255,11 @@ public class HighwayPaver extends Module {
             return;
         }
 
-        if (offhandReplenish.get() && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get() && inventoryCooldown == 0)
+        if (offhandReplenish.get()
+            && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get()
+            && inventoryCooldown == 0
+            && !mc.player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
+        )
         {
 //            FindItemResult results = InvUtils.find(stack -> whitelist.get().stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
             int result = findBlockInInv();
