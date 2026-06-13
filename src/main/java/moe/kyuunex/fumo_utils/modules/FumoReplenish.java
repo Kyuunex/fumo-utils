@@ -113,6 +113,13 @@ public class FumoReplenish extends Module {
         .build()
     );
 
+    public final Setting<Boolean> notWhenInventoryOpen = sgDefault.add(new BoolSetting.Builder()
+        .name("not-when-inventory-open")
+        .description("Don't replenish when the inventory is open. Workaround to slot brainrot.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final Setting<Boolean> debugPrint = sgDefault.add(new BoolSetting.Builder()
         .name("debug-print")
         .description("Print debug messages")
@@ -131,6 +138,7 @@ public class FumoReplenish extends Module {
     private void onTick(TickEvent.Post event) {
         if (mc.level == null) return;
         if (mc.player == null) return;
+        if (mc.player.hasContainerOpen() && notWhenInventoryOpen.get()) return;
 
         if (timer > cooldown.get()) {
             timer = 0;
