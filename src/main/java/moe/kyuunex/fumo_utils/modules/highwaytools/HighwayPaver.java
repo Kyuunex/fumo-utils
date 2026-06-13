@@ -1,7 +1,6 @@
 package moe.kyuunex.fumo_utils.modules.highwaytools;
 
 import java.util.ArrayList;
-import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -162,13 +161,6 @@ public class HighwayPaver extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noGrimDesyncFixWhenNoMove = sgExperimentalSettings.add(new BoolSetting.Builder()
-        .name("no-desync-fix-when-stopping")
-        .description("You can tell just how jank is needed to deal with grim")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<Boolean> cornerPaveEnableSetting = sgExperimentalSettings.add(new BoolSetting.Builder()
         .name("corner-pave")
         .description("Instead of paving 1 block in each direction, you are walking at the corner and paving 2 blocks in only one direction.")
@@ -186,7 +178,6 @@ public class HighwayPaver extends Module {
     private int timer = -1;
     private int inventoryCooldown = 0;
     public static int yLevel = 118;
-    public static boolean stopMovement = false;
     public static Direction diggingDirection = Direction.EAST;
     public static Direction sideDirection = Direction.SOUTH;
     public static boolean sidePavingEnabled = false;
@@ -217,7 +208,6 @@ public class HighwayPaver extends Module {
             yLevel = mc.player.getBlockY() - 1;
         }
 
-        stopMovement = false;
         sideDirection = sideDirectionSetting.get();
         sidePavingEnabled = sideBlocksEnableSetting.get();
         cornerPavingEnabled = cornerPaveEnableSetting.get();
@@ -226,7 +216,6 @@ public class HighwayPaver extends Module {
 
     @Override
     public void onDeactivate() {
-        stopMovement = false;
         inventoryCooldown = 0;
     }
 
@@ -237,7 +226,6 @@ public class HighwayPaver extends Module {
 
         if (grimDesyncFix.get()) {
             info("Rubber banding detected?");
-            if (stopMovement && noGrimDesyncFixWhenNoMove.get()) return;
             BlockPos currentBlockPos = mc.player.blockPosition();
             placeBlock(currentBlockPos.relative(diggingDirection), false);
         }
@@ -265,10 +253,9 @@ public class HighwayPaver extends Module {
             int result = findBlockInInv();
             if (result != -1) {
                 // InvUtils.move().from(results.slot()).to(40);
-                InventoryUtils.swapToHotbar(slotAdjust(result), 40);
+                InventoryUtils.swapToHotbar(toContainerId(result), 40);
                 inventoryCooldown = inventoryCooldownDef.get();
-                stopMovement = false;
-                if (debugPrint.get()) info("replenished from %s to %s, unadjusted %s".formatted(slotAdjust(result), 40, result));
+                if (debugPrint.get()) info("replenished from %s to %s, unadjusted %s".formatted(toContainerId(result), 40, result));
             } else {
                 if (disconnectWhenCantReplenish.get()) {
                     ClientPacketListener network = mc.getConnection();
@@ -276,7 +263,6 @@ public class HighwayPaver extends Module {
                 } else {
                     info("cannot replenish blocks, none found in inventory!");
                     inventoryCooldown = inventoryCooldownDef.get();
-                    stopMovement = true;
                 }
             }
         }
@@ -335,7 +321,7 @@ public class HighwayPaver extends Module {
         return false;
     }
 
-    private int slotAdjust(int slot) {
+    private int toContainerId(int slot) {
         // I have no idea what Mojang was smoking to make this necessary
 
         if (slot == -1) return -1;
@@ -363,15 +349,6 @@ public class HighwayPaver extends Module {
         }
 
         return -1;
-    }
-
-    @EventHandler
-    private void onPlayerMove(PlayerMoveEvent event) {
-        if (stopMovement) {
-            event.movement.x = 0;
-            event.movement.y = 0;
-            event.movement.z = 0;
-        }
     }
 
     public void sendPacket(Packet<?> packet) {

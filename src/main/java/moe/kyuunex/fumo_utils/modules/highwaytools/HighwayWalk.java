@@ -19,6 +19,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HighwayWalk extends Module {
@@ -210,18 +211,20 @@ public class HighwayWalk extends Module {
         if (HighwayAligner.misaligned) {
             info("misaligned, stopping...");
             mc.options.keyUp.setDown(false);
-            return;
-        }
-
-        if (HighwayPaver.stopMovement) {
-            info("can't replenish, stopping movement...");
-            mc.options.keyUp.setDown(false);
+            toggle();
             return;
         }
 
         if (walkingCooldown > 0) {
             walkingCooldown--;
             mc.options.keyUp.setDown(false);
+            return;
+        }
+
+        if (mc.player.getOffhandItem().isEmpty() || !mc.player.getOffhandItem().is(Items.NETHERRACK)) {
+            info("No items in offhand, stopping...");
+            mc.options.keyUp.setDown(false);
+            walkingCooldown = lagbackPauseDuration.get();
             return;
         }
 
