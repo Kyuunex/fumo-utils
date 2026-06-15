@@ -4,8 +4,6 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -13,10 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
@@ -29,7 +24,6 @@ import net.minecraft.world.phys.Vec3;
 
 public class HighwaySponge extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
 
     private final Setting<Shape> shape = sgGeneral.add(new EnumSetting.Builder<Shape>()
         .name("shape")
@@ -71,32 +65,6 @@ public class HighwaySponge extends Module {
         .build()
     );
 
-    // Whitelist and blacklist
-
-    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
-        .name("list-mode")
-        .description("Selection mode.")
-        .defaultValue(ListMode.Whitelist)
-        .build()
-    );
-
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
-        .name("whitelist")
-        .description("The allowed blocks that it will use to fill up the liquid.")
-        .defaultValue(
-            Blocks.NETHERRACK
-        )
-        .visible(() -> listMode.get() == ListMode.Whitelist)
-        .build()
-    );
-
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
-        .name("blacklist")
-        .description("The denied blocks that it not will use to fill up the liquid.")
-        .visible(() -> listMode.get() == ListMode.Blacklist)
-        .build()
-    );
-
     private final List<BlockPos.MutableBlockPos> blocks = new ArrayList<>();
 
     private int timer;
@@ -105,7 +73,7 @@ public class HighwaySponge extends Module {
         super(
             FumoUtils.HIGHWAY,
             "highway-sponge",
-            "Plug lava source with netherrack. Must be with offhand!"
+            "Plug lava source with a block in your offhand!"
         );
     }
 
@@ -129,14 +97,9 @@ public class HighwaySponge extends Module {
         double pY = mc.player.getY();
         double pZ = mc.player.getZ();
 
-        // Find slot with a block
-        FindItemResult item;
-        if (listMode.get() == ListMode.Whitelist) {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.byItem(itemStack.getItem())));
-        } else {
-            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && !blacklist.get().contains(Block.byItem(itemStack.getItem())));
+        if (!HighwayPaver.slotHasPavingBlock(mc.player.getOffhandItem())) {
+            return;
         }
-        if (!item.found()) return;
 
         // Loop blocks around the player
         BlockIterator.register((int) Math.ceil(placeRange.get() + 1), (int) Math.ceil(placeRange.get()), (blockPos, blockState) -> {
@@ -172,11 +135,6 @@ public class HighwaySponge extends Module {
             }
             blocks.clear();
         });
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 
     public enum SortMode {

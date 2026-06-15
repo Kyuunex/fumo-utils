@@ -113,6 +113,11 @@ public class HighwayPaver extends Module {
     private final Setting<List<Block>> whitelist = sgDefault.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("Only places blocks in this list.")
+        .defaultValue(
+            Blocks.NETHERRACK,
+            Blocks.BLACKSTONE,
+            Blocks.BASALT
+        )
         .build()
     );
 
@@ -183,6 +188,13 @@ public class HighwayPaver extends Module {
     public static boolean sidePavingEnabled = false;
     public static boolean cornerPavingEnabled = false;
     public static boolean guardRailsEnabled = false;
+    public static List<Block> pavingBlocks = new ArrayList<>();
+
+    private void notice(String notice) {
+        if (debugPrint.get()) {
+            info(notice);
+        }
+    }
 
     public HighwayPaver() {
         super(
@@ -190,6 +202,7 @@ public class HighwayPaver extends Module {
             "highway-paver",
             "Specialized scaffold module to pave a tunnel."
         );
+        pavingBlocks = List.copyOf(whitelist.get());
     }
 
     @Override
@@ -212,6 +225,7 @@ public class HighwayPaver extends Module {
         sidePavingEnabled = sideBlocksEnableSetting.get();
         cornerPavingEnabled = cornerPaveEnableSetting.get();
         guardRailsEnabled = guardRailsEnableSetting.get();
+        pavingBlocks = List.copyOf(whitelist.get());
     }
 
     @Override
@@ -225,7 +239,7 @@ public class HighwayPaver extends Module {
         if (!(event.packet instanceof ServerboundAcceptTeleportationPacket)) return;
 
         if (grimDesyncFix.get()) {
-            info("Rubber banding detected?");
+            notice("Rubber banding detected?");
             BlockPos currentBlockPos = mc.player.blockPosition();
             placeBlock(currentBlockPos.relative(diggingDirection), false);
         }
@@ -249,13 +263,13 @@ public class HighwayPaver extends Module {
             && !mc.player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
         )
         {
-//            FindItemResult results = InvUtils.find(stack -> whitelist.get().stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
+//            FindItemResult results = InvUtils.find(stack -> pavingBlocks.stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
             int result = findBlockInInv();
             if (result != -1) {
                 // InvUtils.move().from(results.slot()).to(40);
                 InventoryUtils.swapToHotbar(toContainerId(result), 40);
                 inventoryCooldown = inventoryCooldownDef.get();
-                if (debugPrint.get()) info("replenished from %s to %s, unadjusted %s".formatted(toContainerId(result), 40, result));
+                notice("replenished from %s to %s, unadjusted %s".formatted(toContainerId(result), 40, result));
             } else {
                 if (disconnectWhenCantReplenish.get()) {
                     ClientPacketListener network = mc.getConnection();
@@ -336,7 +350,7 @@ public class HighwayPaver extends Module {
 
         List<Item> items = new ArrayList<>();
 
-        for (Block block : whitelist.get()) {
+        for (Block block : pavingBlocks) {
             items.add(block.asItem());
         }
 
@@ -349,6 +363,21 @@ public class HighwayPaver extends Module {
         }
 
         return -1;
+    }
+
+    public static boolean slotHasPavingBlock(ItemStack itemStack) {
+        if (itemStack == null) {
+            return false;
+        }
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        for (Block block : pavingBlocks) {
+            if (itemStack.is(block.asItem())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void sendPacket(Packet<?> packet) {

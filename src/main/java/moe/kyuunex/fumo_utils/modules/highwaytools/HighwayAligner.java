@@ -19,15 +19,15 @@ public class HighwayAligner extends Module {
 
     private final Setting<Boolean> disconnect = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect")
-        .description("Disconnect when an admin is on")
+        .description("Disconnect when you are misaligned.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Integer> leniency = sgGeneral.add(new IntSetting.Builder()
         .name("leniency")
-        .description("")
-        .defaultValue(5)
+        .description("This is needed in cases of lag that briefly lowers player's y level.")
+        .defaultValue(10)
         .sliderRange(0, 10)
         .range(-1, 1000)
         .build()
@@ -35,7 +35,7 @@ public class HighwayAligner extends Module {
 
     private final Setting<Integer> yLevel = sgGeneral.add(new IntSetting.Builder()
         .name("y-level")
-        .description("")
+        .description("Player Block position.")
         .defaultValue(119)
         .range(-500, 20000)
         .sliderRange(50, 130)
@@ -44,14 +44,14 @@ public class HighwayAligner extends Module {
 
     private final Setting<Direction.Axis> currentAxis = sgGeneral.add(new EnumSetting.Builder<Direction.Axis>()
         .name("current-axis")
-        .description("Axis that stays the same")
+        .description("Axis that has it's coordinate not change. Example, 125k offset NORTH = -125000z")
         .defaultValue(Direction.Axis.X)
         .build()
     );
 
     private final Setting<Integer> horizontalCoord = sgGeneral.add(new IntSetting.Builder()
         .name("horizontal-coordinate")
-        .description("")
+        .description("Coordinate that stays the same. Example, 125k offset NORTH = -125000z")
         .defaultValue(30000000)
         .range(-30000000, 30000000)
         .sliderRange(30000000, 30000000)
@@ -88,10 +88,16 @@ public class HighwayAligner extends Module {
     private int timer = 0;
     public static boolean misaligned = false;
 
+    private void notice(String notice) {
+        if (debugPrint.get()) {
+            info(notice);
+        }
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player == null) return;
-        if (debugPrint.get()) info("%s".formatted(mc.player.blockPosition().get(currentAxis.get())));
+        notice("%s".formatted(mc.player.blockPosition().get(currentAxis.get())));
         if ((int)mc.player.position().y() != yLevel.get() || mc.player.blockPosition().get(currentAxis.get()) != (horizontalCoord.get() + blockOffset.get())) {
 
             if (timer < leniency.get()) {
@@ -100,7 +106,7 @@ public class HighwayAligner extends Module {
             }
 
             if (mc.level.getBlockState(mc.player.blockPosition()).getBlock() == Blocks.SOUL_SAND) {
-                info("soul sand");
+                notice("soul sand");
                 return;
             }
 
@@ -112,7 +118,7 @@ public class HighwayAligner extends Module {
 
             ClientPacketListener network = mc.getConnection();
             timer = 0;
-            if (disconnect.get()){
+            if (disconnect.get()) {
                 DisconnectUtils.disconnect(network, "[HighwayAligner] You are misaligned");
             }
         } else {

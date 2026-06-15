@@ -19,7 +19,6 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HighwayWalk extends Module {
@@ -95,6 +94,13 @@ public class HighwayWalk extends Module {
         .name("pause-when-unmined")
         .description("Stop when not fully mined in front.")
         .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> debugPrint = sgGeneral.add(new BoolSetting.Builder()
+        .name("debug-print")
+        .description("Print debug messages")
+        .defaultValue(false)
         .build()
     );
 
@@ -182,6 +188,12 @@ public class HighwayWalk extends Module {
     private boolean keepMoving = true;
     private int walkingCooldown = 0;
 
+    private void notice(String notice) {
+        if (debugPrint.get()) {
+            info(notice);
+        }
+    }
+
 
     @Override
     public void onDeactivate() {
@@ -221,7 +233,7 @@ public class HighwayWalk extends Module {
             return;
         }
 
-        if (mc.player.getOffhandItem().isEmpty() || !mc.player.getOffhandItem().is(Items.NETHERRACK)) {
+        if (!HighwayPaver.slotHasPavingBlock(mc.player.getOffhandItem())) {
             info("No items in offhand, stopping...");
             mc.options.keyUp.setDown(false);
             walkingCooldown = lagbackPauseDuration.get();
@@ -409,7 +421,7 @@ public class HighwayWalk extends Module {
         if (!(event.packet instanceof ServerboundAcceptTeleportationPacket)) return;
 
         if (lagbackPauseEnable.get()) {
-            info("Rubber banding detected?");
+            notice("Rubber banding detected?");
             walkingCooldown = lagbackPauseDuration.get();
         }
     }
