@@ -5,6 +5,7 @@
   "client": [
     "ClientIntentionPacketMixin",
     "meteorclient.AutoToolMixin",
+    "meteorclient.KillAuraMixin",
     "meteorclient.LiquidFillerMixin",
     "meteorclient.MicrosoftAccountMixin",
     "meteorclient.NukerMixin"
