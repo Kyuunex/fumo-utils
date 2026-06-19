@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "ClientIntentionPacketMixin",
+    "meteorclient.AutoToolMixin",
     "meteorclient.LiquidFillerMixin",
     "meteorclient.MicrosoftAccountMixin",
     "meteorclient.NukerMixin"
