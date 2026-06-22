@@ -8,8 +8,11 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.material.Fluid;
@@ -62,6 +65,13 @@ public class HighwaySponge extends Module {
         .name("sort-mode")
         .description("The blocks you want to place first.")
         .defaultValue(SortMode.Furthest)
+        .build()
+    );
+
+    private final Setting<Boolean> packet = sgGeneral.add(new BoolSetting.Builder()
+        .name("packet-place")
+        .description("Packet place instead of normal place. Recommended so you don't fall off.")
+        .defaultValue(true)
         .build()
     );
 
@@ -182,6 +192,22 @@ public class HighwaySponge extends Module {
         if (mc.player == null) return;
         if (mc.gameMode == null) return;
 
+        if (packet.get()) {
+            sendPacket(
+                new ServerboundUseItemOnPacket(
+                    InteractionHand.OFF_HAND,
+                    new BlockHitResult(
+                        Vec3.atCenterOf(pos),
+                        Direction.UP,
+                        pos,
+                        false
+                    ),
+                    0
+                )
+            );
+            return;
+        }
+
         mc.gameMode.useItemOn(
             mc.player,
             InteractionHand.OFF_HAND,
@@ -192,5 +218,11 @@ public class HighwaySponge extends Module {
                 false
             )
         ).consumesAction();
+    }
+
+    public void sendPacket(Packet<?> packet) {
+        ClientPacketListener network = mc.getConnection();
+        if (network == null) return;
+        network.getConnection().send(packet, null, true);
     }
 }

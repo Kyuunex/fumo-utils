@@ -19,6 +19,8 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
+import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class HighwayWalk extends Module {
@@ -333,6 +335,14 @@ public class HighwayWalk extends Module {
                     new ServerboundSetCarriedItemPacket(eatingStuckFixSlot.get()),
                     null,
                     true
+                );
+                mc.getConnection().getConnection().send(
+                    new ServerboundUseItemPacket(
+                        InteractionHand.MAIN_HAND,
+                        0,
+                        mc.player.getYRot(),
+                        mc.player.getXRot()
+                    )
                 );
                 eatingTimePassed = 0;
             }

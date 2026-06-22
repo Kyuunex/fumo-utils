@@ -16,6 +16,7 @@ import moe.kyuunex.fumo_utils.utils.ported.BlockUtils;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundAcceptTeleportationPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
@@ -238,6 +239,9 @@ public class HighwayPaver extends Module {
         if (mc.player == null) return;
         if (!(event.packet instanceof ServerboundAcceptTeleportationPacket)) return;
 
+        if (Modules.get().get(AutoGap.class).isEating()) return;
+        if (Modules.get().get(AutoEat.class).eating) return;
+
         if (grimDesyncFix.get()) {
             notice("Rubber banding detected?");
             BlockPos currentBlockPos = mc.player.blockPosition();
@@ -252,6 +256,10 @@ public class HighwayPaver extends Module {
         if (Modules.get().get(AutoGap.class).isEating()) return;
         if (Modules.get().get(AutoEat.class).eating) return;
 
+        if (HighwayAligner.misaligned) {
+            return;
+        }
+
         if (timer < interval.get()) {
             timer++;
             return;
@@ -261,6 +269,7 @@ public class HighwayPaver extends Module {
             && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get()
             && inventoryCooldown == 0
             && !mc.player.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
+            && mc.player.getOffhandItem().getItem().components().get(DataComponents.FOOD) == null
         )
         {
 //            FindItemResult results = InvUtils.find(stack -> pavingBlocks.stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
@@ -315,14 +324,24 @@ public class HighwayPaver extends Module {
     }
 
     private void placeBlock(BlockPos pos, boolean packetPlace) {
-        if (mc.gameMode == null || mc.player == null) return;
+        if (mc.player == null) return;
+        if (mc.gameMode == null) return;
 
         if (!isPlacable(pos)) return;
 
         if (packetPlace) {
-            sendPacket(new ServerboundUseItemOnPacket(InteractionHand.OFF_HAND, BlockUtils.getSafeHitResult(pos),0));
+            sendPacket(
+                new ServerboundUseItemOnPacket(
+                    InteractionHand.OFF_HAND,
+                    BlockUtils.getSafeHitResult(pos),0
+                )
+            );
         } else {
-            mc.gameMode.useItemOn(mc.player, InteractionHand.OFF_HAND, BlockUtils.getSafeHitResult(pos)).consumesAction();
+            mc.gameMode.useItemOn(
+                mc.player,
+                InteractionHand.OFF_HAND,
+                BlockUtils.getSafeHitResult(pos)
+            ).consumesAction();
         }
     }
 
