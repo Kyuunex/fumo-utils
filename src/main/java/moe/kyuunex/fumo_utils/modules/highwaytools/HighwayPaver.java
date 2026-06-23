@@ -34,17 +34,9 @@ import java.util.List;
 
 public class HighwayPaver extends Module {
     private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgPlacementSettings = settings.createGroup("Placement");
     private final SettingGroup sgInventorySettings = settings.createGroup("Inventory");
     private final SettingGroup sgExperimentalSettings = settings.createGroup("Experimental");
-
-    private final Setting<Integer> interval = sgDefault.add(new IntSetting.Builder()
-        .name("interval")
-        .description("How long to wait between placing bursts")
-        .defaultValue(1)
-        .sliderRange(0, 100)
-        .range(-1, 1000)
-        .build()
-    );
 
     private final Setting<Boolean> forceYLevelEnable = sgDefault.add(new BoolSetting.Builder()
         .name("forced-y-level")
@@ -78,14 +70,30 @@ public class HighwayPaver extends Module {
         .build()
     );
 
-    private final Setting<Boolean> sideBlocksEnableSetting = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> debugPrint = sgDefault.add(new BoolSetting.Builder()
+        .name("debug-print")
+        .description("Print debug messages")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> placeCooldownDef = sgPlacementSettings.add(new IntSetting.Builder()
+        .name("placement-burst-cooldown")
+        .description("How long to wait between placing bursts.")
+        .defaultValue(10)
+        .sliderRange(0, 100)
+        .range(-1, 1000)
+        .build()
+    );
+
+    private final Setting<Boolean> sideBlocksEnableSetting = sgPlacementSettings.add(new BoolSetting.Builder()
         .name("place-blocks-on-side")
         .description("3 blocks wide instead of 1.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Direction> sideDirectionSetting = sgDefault.add(new EnumSetting.Builder<Direction>()
+    private final Setting<Direction> sideDirectionSetting = sgPlacementSettings.add(new EnumSetting.Builder<Direction>()
         .name("side-direction")
         .description("Which direction is your right or left. "
             + "If you are walking North, you select East or West, "
@@ -96,7 +104,7 @@ public class HighwayPaver extends Module {
         .build()
     );
 
-    private final Setting<Integer> howFarAhead = sgDefault.add(new IntSetting.Builder()
+    private final Setting<Integer> howFarAhead = sgPlacementSettings.add(new IntSetting.Builder()
         .name("how-far-ahead")
         .description("How far ahead to place the blocks?")
         .sliderRange(0, 6)
@@ -104,14 +112,14 @@ public class HighwayPaver extends Module {
         .build()
     );
 
-    private final Setting<Boolean> packet = sgDefault.add(new BoolSetting.Builder()
+    private final Setting<Boolean> packet = sgPlacementSettings.add(new BoolSetting.Builder()
         .name("packet-place")
         .description("Packet place instead of normal place. Recommended so you don't fall off.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgDefault.add(new BlockListSetting.Builder()
+    private final Setting<List<Block>> whitelist = sgPlacementSettings.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("Only places blocks in this list.")
         .defaultValue(
@@ -122,9 +130,16 @@ public class HighwayPaver extends Module {
         .build()
     );
 
-    public final Setting<Boolean> debugPrint = sgDefault.add(new BoolSetting.Builder()
-        .name("debug-print")
-        .description("Print debug messages")
+    private final Setting<Boolean> cornerPaveEnableSetting = sgPlacementSettings.add(new BoolSetting.Builder()
+        .name("corner-pave")
+        .description("Instead of paving 1 block in each direction, you are walking at the corner and paving 2 blocks in only one direction.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> guardRailsEnableSetting = sgPlacementSettings.add(new BoolSetting.Builder()
+        .name("guard-rails")
+        .description("Add guardrails.")
         .defaultValue(false)
         .build()
     );
@@ -147,8 +162,8 @@ public class HighwayPaver extends Module {
 
     private final Setting<Integer> replenishWhenBelow = sgInventorySettings.add(new IntSetting.Builder()
         .name("replenish-when-below")
-        .description("")
-        .sliderRange(0, 64)
+        .description("Replenish when item stack count is less than this.")
+        .sliderRange(1, 64)
         .defaultValue(16)
         .build()
     );
@@ -167,22 +182,8 @@ public class HighwayPaver extends Module {
         .build()
     );
 
-    private final Setting<Boolean> cornerPaveEnableSetting = sgExperimentalSettings.add(new BoolSetting.Builder()
-        .name("corner-pave")
-        .description("Instead of paving 1 block in each direction, you are walking at the corner and paving 2 blocks in only one direction.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> guardRailsEnableSetting = sgExperimentalSettings.add(new BoolSetting.Builder()
-        .name("guard-rails")
-        .description("Add guardrails.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private int timer = -1;
     private int inventoryCooldown = 0;
+    private int placingCycleCooldown = 0;
     public static int yLevel = 118;
     public static Direction diggingDirection = Direction.EAST;
     public static Direction sideDirection = Direction.SOUTH;
@@ -232,6 +233,7 @@ public class HighwayPaver extends Module {
     @Override
     public void onDeactivate() {
         inventoryCooldown = 0;
+        placingCycleCooldown = 0;
     }
 
     @EventHandler
@@ -260,11 +262,6 @@ public class HighwayPaver extends Module {
             return;
         }
 
-        if (timer < interval.get()) {
-            timer++;
-            return;
-        }
-
         if (offhandReplenish.get()
             && mc.player.getOffhandItem().getCount() < replenishWhenBelow.get()
             && inventoryCooldown == 0
@@ -272,17 +269,14 @@ public class HighwayPaver extends Module {
             && mc.player.getOffhandItem().getItem().components().get(DataComponents.FOOD) == null
         )
         {
-//            FindItemResult results = InvUtils.find(stack -> pavingBlocks.stream().anyMatch((block -> block.asItem() == stack.getItem() && stack.getCount() >= replenishWhenBelow.get())));
             int result = findBlockInInv();
             if (result != -1) {
-                // InvUtils.move().from(results.slot()).to(40);
                 InventoryUtils.swapToHotbar(toContainerId(result), 40);
                 inventoryCooldown = inventoryCooldownDef.get();
                 notice("replenished from %s to %s, unadjusted %s".formatted(toContainerId(result), 40, result));
             } else {
                 if (disconnectWhenCantReplenish.get()) {
-                    ClientPacketListener network = mc.getConnection();
-                    DisconnectUtils.disconnect(network, "cannot replenish blocks, none found in inventory!");
+                    DisconnectUtils.disconnect(mc.getConnection(), "cannot replenish blocks, none found in inventory!");
                 } else {
                     info("cannot replenish blocks, none found in inventory!");
                     inventoryCooldown = inventoryCooldownDef.get();
@@ -290,33 +284,39 @@ public class HighwayPaver extends Module {
             }
         }
 
-        BlockPos playerBlockPos = mc.player.blockPosition();
+        if (placingCycleCooldown == 0) {
+            BlockPos playerBlockPos = mc.player.blockPosition();
 
-        for (int i = 0; i <= howFarAhead.get(); i++) {
-            BlockPos basePos = playerBlockPos.atY(yLevel).relative(diggingDirection, i);
-            placeBlock(basePos, packet.get());
-            if (sidePavingEnabled) {
-                placeBlock(basePos.relative(sideDirection), packet.get());
-                if (cornerPavingEnabled) {
-                    placeBlock(basePos.relative(sideDirection, 2), packet.get());
-                } else {
-                    placeBlock(basePos.relative(sideDirection.getOpposite()), packet.get());
-                }
-
-                if (guardRailsEnabled) {
+            for (int i = 0; i <= howFarAhead.get(); i++) {
+                BlockPos basePos = playerBlockPos.atY(yLevel).relative(diggingDirection, i);
+                placeBlock(basePos, packet.get());
+                if (sidePavingEnabled) {
+                    placeBlock(basePos.relative(sideDirection), packet.get());
                     if (cornerPavingEnabled) {
-                        placeBlock(basePos.above().relative(sideDirection, 3), packet.get());
-                        placeBlock(basePos.above().relative(sideDirection.getOpposite(), 1), packet.get());
+                        placeBlock(basePos.relative(sideDirection, 2), packet.get());
                     } else {
-                        placeBlock(basePos.above().relative(sideDirection, 2), packet.get());
-                        placeBlock(basePos.above().relative(sideDirection.getOpposite(), 2), packet.get());
+                        placeBlock(basePos.relative(sideDirection.getOpposite()), packet.get());
+                    }
+
+                    if (guardRailsEnabled) {
+                        if (cornerPavingEnabled) {
+                            placeBlock(basePos.above().relative(sideDirection, 3), packet.get());
+                            placeBlock(basePos.above().relative(sideDirection.getOpposite(), 1),
+                                packet.get());
+                        } else {
+                            placeBlock(basePos.above().relative(sideDirection, 2), packet.get());
+                            placeBlock(basePos.above().relative(sideDirection.getOpposite(), 2),
+                                packet.get());
+                        }
                     }
                 }
             }
+            placingCycleCooldown = placeCooldownDef.get();
         }
 
-
-        timer = 0;
+        if (placingCycleCooldown > 0) {
+            placingCycleCooldown--;
+        }
 
         if (inventoryCooldown > 0) {
             inventoryCooldown--;
