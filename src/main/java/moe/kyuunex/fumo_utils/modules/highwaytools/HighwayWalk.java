@@ -327,32 +327,33 @@ public class HighwayWalk extends Module {
             }
         }
 
-        if (pauseWhenEating.get()) {
-            if (eatingStuckFixEnable.get() && eatingTimePassed > eatingStuckFixTime.get()) {
-                info("eating for too long. attempting to reset eating.");
-                mc.player.getInventory().setSelectedSlot(eatingStuckFixSlot.get());
-                mc.getConnection().getConnection().send(
-                    new ServerboundSetCarriedItemPacket(eatingStuckFixSlot.get()),
-                    null,
-                    true
-                );
-                mc.getConnection().getConnection().send(
-                    new ServerboundUseItemPacket(
-                        InteractionHand.MAIN_HAND,
-                        0,
-                        mc.player.getYRot(),
-                        mc.player.getXRot()
-                    )
-                );
-                eatingTimePassed = 0;
-            }
-            if (Modules.get().get(AutoGap.class).isEating() || Modules.get().get(AutoEat.class).eating) {
+        if (eatingStuckFixEnable.get() && eatingTimePassed > eatingStuckFixTime.get()) {
+            info("eating for too long. attempting to reset eating.");
+            mc.player.getInventory().setSelectedSlot(eatingStuckFixSlot.get());
+            mc.getConnection().getConnection().send(
+                new ServerboundSetCarriedItemPacket(eatingStuckFixSlot.get()),
+                null,
+                true
+            );
+            mc.getConnection().getConnection().send(
+                new ServerboundUseItemPacket(
+                    InteractionHand.MAIN_HAND,
+                    0,
+                    mc.player.getYRot(),
+                    mc.player.getXRot()
+                )
+            );
+            eatingTimePassed = 0;
+        }
+
+        if (Modules.get().get(AutoGap.class).isEating() || Modules.get().get(AutoEat.class).eating) {
+            eatingTimePassed += 1;
+            if (pauseWhenEating.get()) {
                 mc.options.keyUp.setDown(false);
-                eatingTimePassed += 1;
                 return;
-            } else {
-                eatingTimePassed = 0;
             }
+        } else {
+            eatingTimePassed = 0;
         }
 
         if (pauseWhenHighway.get()){
@@ -364,28 +365,28 @@ public class HighwayWalk extends Module {
                 int minY = (forward == 0) ? 2 : 0; // don't check where player already is
                 for (int up = minY; up <= 3; up++) {
                     BlockPos checkPos = basePos.relative(fwDir, forward).above(up);
-                    if (!mc.level.getBlockState(checkPos).isAir()) {
+                    if (!canWalkThrough(checkPos)) {
                         blocked = true;
                         break;
                     }
                     if (HighwayPaver.sidePavingEnabled) {
                         BlockPos checkPosSide = basePos.relative(fwDir, forward).above(up)
                             .relative(HighwayPaver.sideDirection);
-                        if (!mc.level.getBlockState(checkPosSide).isAir()) {
+                        if (!canWalkThrough(checkPosSide)) {
                             blocked = true;
                             break;
                         }
                         if (HighwayPaver.cornerPavingEnabled) {
                             BlockPos checkPosSide2 = basePos.relative(fwDir, forward).above(up)
                                 .relative(HighwayPaver.sideDirection, 2);
-                            if (!mc.level.getBlockState(checkPosSide2).isAir()) {
+                            if (!canWalkThrough(checkPosSide2)) {
                                 blocked = true;
                                 break;
                             }
                         } else {
                             BlockPos checkPosSide2 = basePos.relative(fwDir, forward).above(up)
                                 .relative(HighwayPaver.sideDirection.getOpposite());
-                            if (!mc.level.getBlockState(checkPosSide2).isAir()) {
+                            if (!canWalkThrough(checkPosSide2)) {
                                 blocked = true;
                                 break;
                             }
@@ -423,6 +424,10 @@ public class HighwayWalk extends Module {
         if (state.liquid()) return false;
         if (state.isSolid()) return true;
         return false;
+    }
+
+    private boolean canWalkThrough(BlockPos pos){
+        return mc.level.getBlockState(pos).isAir() || mc.level.getBlockState(pos).liquid();
     }
 
     @EventHandler

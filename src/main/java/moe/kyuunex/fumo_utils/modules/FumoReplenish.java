@@ -6,6 +6,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
 import moe.kyuunex.fumo_utils.FumoUtils;
+import moe.kyuunex.fumo_utils.utils.Webhook;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -120,6 +121,21 @@ public class FumoReplenish extends Module {
         .build()
     );
 
+    private final Setting<Boolean> notifyWhenCantReplenish = sgDefault.add(new BoolSetting.Builder()
+        .name("notify-when-cant-replenish")
+        .description("Notify via webhook when can't replenish.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<String> webhookUrl = sgDefault.add(new StringSetting.Builder()
+        .name("webhook-url")
+        .description("Discord webhook URL")
+        .defaultValue("")
+        .visible(notifyWhenCantReplenish::get)
+        .build()
+    );
+
     public final Setting<Boolean> debugPrint = sgDefault.add(new BoolSetting.Builder()
         .name("debug-print")
         .description("Print debug messages")
@@ -131,8 +147,20 @@ public class FumoReplenish extends Module {
         super(FumoUtils.CATEGORY, "fumo-replenish", "A very specialized replenish module");
     }
 
+    private void notice(String notice) {
+        if (debugPrint.get()) {
+            info(notice);
+        }
+    }
+
     int timer = 0;
     private int inventoryCooldown = 0;
+    boolean isWebhookNotified = false;
+
+    @Override
+    public void onDeactivate() {
+        isWebhookNotified = false;
+    }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
@@ -184,11 +212,20 @@ public class FumoReplenish extends Module {
         int pickaxeFoundInSlot = findPickaxeInInv();
 
         if (pickaxeFoundInSlot != -1) {
+            isWebhookNotified = false;
             // InvUtils.move().from(pickaxeFoundInSlot).to(preferredPickaxeHotbarSlot.get());
             InventoryUtils.swapToHotbar(pickaxeFoundInSlot, preferredPickaxeHotbarSlot.get());
             inventoryCooldown = inventoryCooldownDef.get();
-            if (debugPrint.get()) info("replenished from %s to %s".formatted(pickaxeFoundInSlot, preferredPickaxeHotbarSlot.get()));
-            info("replenished pickaxe!");
+            notice("replenished pickaxe from %s to %s".formatted(pickaxeFoundInSlot, preferredPickaxeHotbarSlot.get()));
+        } else {
+            if (!isWebhookNotified && notifyWhenCantReplenish.get()) {
+                Webhook.sendAsync(
+                    webhookUrl.get(),
+                    "Fumo Replenish",
+                    "Can't replenish pickaxes."
+                );
+                isWebhookNotified = true;
+            }
         }
     }
 
@@ -238,11 +275,20 @@ public class FumoReplenish extends Module {
         int foodFoundInSlot = findFoodInInv();
 
         if (foodFoundInSlot != -1) {
+            isWebhookNotified = false;
             // InvUtils.move().from(foodFoundInSlot).to(preferredFoodHotbarSlot.get());
             InventoryUtils.swapToHotbar(foodFoundInSlot, preferredFoodHotbarSlot.get());
             inventoryCooldown = 4;
-            info("replenished food!");
-            if (debugPrint.get()) info("replenished from %s to %s".formatted(foodFoundInSlot, preferredFoodHotbarSlot.get()));
+            notice("replenished food from %s to %s".formatted(foodFoundInSlot, preferredFoodHotbarSlot.get()));
+        } else {
+            if (!isWebhookNotified && notifyWhenCantReplenish.get()) {
+                Webhook.sendAsync(
+                    webhookUrl.get(),
+                    "Fumo Replenish",
+                    "Can't replenish food."
+                );
+                isWebhookNotified = true;
+            }
         }
     }
 
