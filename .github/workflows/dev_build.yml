@@ -27,8 +27,8 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: devbuild-26.2
-          name: Dev Build (26.2)
-          prerelease: true
+          tag_name: autobuild-26.2
+          name: Auto Build (26.2)
+          prerelease: false
           files: |
             ./build/libs/*.jar
