@@ -46,6 +46,7 @@ public class FumoUtils extends MeteorAddon {
         Modules.get().add(new TPSLogger());
         Modules.get().add(new TridentDupe());
         Modules.get().add(new Undead());
+        Modules.get().add(new Unreportable());
         Modules.get().add(new WebhookBridge());
         Modules.get().add(new WireGuardIntegration());
 

@@ -34,6 +34,7 @@ for regular use I only support one version of Minecraft/Meteor at a time, curren
 - TPSLogger
 - TridentDupe
 - Undead
+- Unreportable
 - UnSilkToucher
 - WebhookBridge
 - WireGuardIntegration
