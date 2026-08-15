@@ -1,10 +1,10 @@
 # FumoUtils (Public edition)
 FumoUtils is a Meteor Client Addon that provides some additional modules and commands 
 to enhance your anarchy Minecraft experience. While there are older branches for testing purposes, 
-for regular use I only support one version of Minecraft/Meteor at a time, currently being 1.21.11.
+for regular use I only support one version of Minecraft/Meteor at a time, currently being 26.2.
 
 ### Requirements
-- Minecraft 1.21.11
+- Minecraft 26.2
 - Fabric loader
 - Meteor Client
 

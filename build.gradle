@@ -1,0 +1,60 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.minecraft_version
+group = project.maven_group
+
+repositories {
+    maven {
+        name = "Meteor Dev Releases"
+        url = "https://maven.meteordev.org/releases"
+    }
+
+    maven {
+        name = "Meteor Dev Snapshots"
+        url = "https://maven.meteordev.org/snapshots"
+    }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    implementation "meteordevelopment:meteor-client:${project.minecraft_version}-SNAPSHOT"
+    // implementation files("./libs/meteor-client-${project.minecraft_version}-local.jar")
+    // implementation files("./libs/orbit-0.2.4.jar")
+}
+
+loom {
+    accessWidenerPath = file("src/main/resources/fumo-utils.accesswidener")
+}
+
+processResources {
+    def version = project.version
+    inputs.property "version", version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 25
+}
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+jar {
+    def projectName = project.name
+    inputs.property "projectName", projectName
+
+    from("LICENSE") {
+        rename { "${it}_$projectName"}
+    }
+}
